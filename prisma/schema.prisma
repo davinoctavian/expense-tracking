@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  password     String
+  categories   Category[]
+  budgets      Budget[]
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+}
+
+// Flexible categories — no type lock
+// e.g. "Food", "Salary", "Transport", "Freelance"
+model Category {
+  id           String        @id @default(cuid())
+  name         String
+  icon         String?       // emoji e.g. "🍔"
+  color        String?       // hex color e.g. "#FF5733"
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+  budgets      Budget[]
+  createdAt    DateTime      @default(now())
+}
+
+// Budget per period per category
+// e.g. Food = $200 for Monthly March 2025
+model Budget {
+  id         String     @id @default(cuid())
+  amount     Float
+  period     PeriodType // WEEKLY, MONTHLY, YEARLY
+  startDate  DateTime
+  endDate    DateTime
+  categoryId String
+  category   Category   @relation(fields: [categoryId], references: [id])
+  userId     String
+  user       User       @relation(fields: [userId], references: [id])
+  createdAt  DateTime   @default(now())
+}
+
+// Every money movement
+model Transaction {
+  id         String          @id @default(cuid())
+  amount     Float
+  type       TransactionType // INCOME or EXPENSE — chosen per transaction
+  note       String?
+  date       DateTime        // editable — the real date of transaction
+  categoryId String?
+  category   Category?       @relation(fields: [categoryId], references: [id])
+  userId     String
+  user       User            @relation(fields: [userId], references: [id])
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum PeriodType {
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
