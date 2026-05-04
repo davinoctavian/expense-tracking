@@ -5,15 +5,22 @@ export const runtime = "nodejs";
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
+  const username = req.auth?.user?.username;
+  const pathname = req.nextUrl.pathname;
+
   const isAuthPage =
-    req.nextUrl.pathname.startsWith("/login") ||
-    req.nextUrl.pathname.startsWith("/register");
+    pathname.startsWith("/login") || pathname.startsWith("/register");
+  const isAdminPage = pathname.startsWith("/admin");
 
   if (!isLoggedIn && !isAuthPage) {
     return NextResponse.redirect(new URL("/login", req.nextUrl));
   }
 
   if (isLoggedIn && isAuthPage) {
+    return NextResponse.redirect(new URL("/", req.nextUrl));
+  }
+
+  if (isAdminPage && username !== process.env.SUPER_ADMIN_USERNAME) {
     return NextResponse.redirect(new URL("/", req.nextUrl));
   }
 });
