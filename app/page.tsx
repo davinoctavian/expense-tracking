@@ -184,7 +184,7 @@ export default function DashboardPage() {
                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(val: number) => fmt(val)} />
+                  <Tooltip formatter={(val) => fmt(Number(val))} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>

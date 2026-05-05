@@ -1,0 +1,207 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+type Category = {
+  id: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+};
+
+export default function AddTransactionPage() {
+  const router = useRouter();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({
+    amount: "",
+    type: "EXPENSE",
+    note: "",
+    date: new Date().toISOString().split("T")[0],
+    categoryId: "",
+  });
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then(setCategories);
+  }, []);
+
+  const handleSubmit = async (e: React.SubmitEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const res = await fetch("/api/transactions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+
+    const data = await res.json();
+    setLoading(false);
+
+    if (!res.ok) {
+      setError(data.error);
+      return;
+    }
+
+    router.push("/");
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-white shadow-sm px-6 py-4 flex items-center gap-4">
+        <Link href="/" className="text-gray-500 hover:text-gray-800">
+          ←
+        </Link>
+        <h1 className="text-lg font-bold text-gray-800">Add Transaction</h1>
+      </nav>
+
+      <div className="max-w-lg mx-auto p-6">
+        <div className="bg-white rounded-2xl shadow-sm p-6">
+          {error && (
+            <p className="text-red-500 text-sm mb-4 bg-red-50 p-3 rounded-lg">
+              {error}
+            </p>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Type
+              </label>
+              <div className="flex rounded-xl overflow-hidden border border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, type: "EXPENSE" })}
+                  className={`flex-1 py-2.5 text-sm font-medium transition ${
+                    form.type === "EXPENSE"
+                      ? "bg-red-500 text-white"
+                      : "bg-white text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  Expense
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, type: "INCOME" })}
+                  className={`flex-1 py-2.5 text-sm font-medium transition ${
+                    form.type === "INCOME"
+                      ? "bg-green-500 text-white"
+                      : "bg-white text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  Income
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Amount
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                  Rp
+                </span>
+                <input
+                  type="number"
+                  value={form.amount}
+                  onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="0"
+                  min="0"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Date
+              </label>
+              <input
+                type="date"
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Category <span className="text-gray-400">(optional)</span>
+              </label>
+              {categories.length === 0 ? (
+                <div className="text-sm text-gray-400 border border-dashed border-gray-300 rounded-lg p-3 text-center">
+                  No categories yet.{" "}
+                  <Link
+                    href="/categories"
+                    className="text-blue-600 hover:underline"
+                  >
+                    Create one
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, categoryId: "" })}
+                    className={`py-2 px-3 rounded-xl text-sm border transition ${
+                      form.categoryId === ""
+                        ? "border-blue-500 bg-blue-50 text-blue-700"
+                        : "border-gray-200 hover:bg-gray-50 text-gray-600"
+                    }`}
+                  >
+                    None
+                  </button>
+                  {categories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setForm({ ...form, categoryId: cat.id })}
+                      className={`py-2 px-3 rounded-xl text-sm border transition flex items-center gap-1.5 ${
+                        form.categoryId === cat.id
+                          ? "border-blue-500 bg-blue-50 text-blue-700"
+                          : "border-gray-200 hover:bg-gray-50 text-gray-600"
+                      }`}
+                    >
+                      {cat.icon && <span>{cat.icon}</span>}
+                      <span className="truncate">{cat.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Note <span className="text-gray-400">(optional)</span>
+              </label>
+              <textarea
+                value={form.note}
+                onChange={(e) => setForm({ ...form, note: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                placeholder="What was this for?"
+                rows={3}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition disabled:opacity-50"
+            >
+              {loading ? "Saving..." : "Save Transaction"}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
