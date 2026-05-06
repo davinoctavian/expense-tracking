@@ -39,8 +39,8 @@ model Budget {
   period     PeriodType // WEEKLY, MONTHLY, YEARLY
   startDate  DateTime
   endDate    DateTime
-  categoryId String
-  category   Category   @relation(fields: [categoryId], references: [id])
+  categoryId String?
+  category   Category?   @relation(fields: [categoryId], references: [id])
   userId     String
   user       User       @relation(fields: [userId], references: [id])
   createdAt  DateTime   @default(now())

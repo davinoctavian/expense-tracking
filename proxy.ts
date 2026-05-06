@@ -1,8 +1,6 @@
 import { auth } from "./auth";
 import { NextResponse } from "next/server";
 
-export const runtime = "nodejs";
-
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const username = req.auth?.user?.username;
