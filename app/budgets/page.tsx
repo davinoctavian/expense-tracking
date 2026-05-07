@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import ButtonLoader from "@/components/ButtonLoader";
+import FullscreenOverlay from "@/components/FullscreenOverlay";
+import Navbar from "@/components/Navbar";
+import EmptyState from "@/components/EmptyState";
+import FormCard from "@/components/FormCard";
+import ErrorMessage from "@/components/ErrorMessage";
 
 type Category = {
   id: string;
@@ -77,6 +82,7 @@ export default function BudgetsPage() {
     startDate: getPeriodDates("MONTHLY").startDate,
     endDate: getPeriodDates("MONTHLY").endDate,
   });
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchAll();
@@ -110,6 +116,7 @@ export default function BudgetsPage() {
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
+    setSubmitting(true);
     setError("");
 
     const url = editingId ? `/api/budgets/${editingId}` : "/api/budgets";
@@ -129,6 +136,7 @@ export default function BudgetsPage() {
 
     resetForm();
     fetchAll();
+    setSubmitting(false);
   };
 
   const handleEdit = (budget: Budget) => {
@@ -163,34 +171,27 @@ export default function BudgetsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm px-6 py-4 flex items-center gap-4">
-        <Link href="/" className="text-gray-500 hover:text-gray-800">
-          ←
-        </Link>
-        <h1 className="text-lg font-bold text-gray-800">Budgets</h1>
-        <button
-          onClick={() => {
-            resetForm();
-            setShowForm(true);
-          }}
-          className="ml-auto text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700"
-        >
-          + New Budget
-        </button>
-      </nav>
+      <FullscreenOverlay show={submitting} />
+      <Navbar
+        title="Budgets"
+        backHref="/"
+        actions={
+          <button
+            onClick={() => {
+              resetForm();
+              setShowForm(true);
+            }}
+            className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700"
+          >
+            + New Budget
+          </button>
+        }
+      />
 
       <div className="max-w-2xl mx-auto p-6 space-y-4">
         {showForm && (
-          <div className="bg-white rounded-2xl shadow-sm p-6">
-            <h2 className="text-sm font-semibold text-gray-700 mb-4">
-              {editingId ? "Edit Budget" : "New Budget"}
-            </h2>
-
-            {error && (
-              <p className="text-red-500 text-sm mb-4 bg-red-50 p-3 rounded-lg">
-                {error}
-              </p>
-            )}
+          <FormCard title={editingId ? "Edit Budget" : "New Budget"}>
+            <ErrorMessage message={error} />
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -303,12 +304,10 @@ export default function BudgetsPage() {
               </div>
 
               <div className="flex gap-2">
-                <button
-                  type="submit"
-                  className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl font-medium hover:bg-blue-700 transition"
-                >
-                  {editingId ? "Save Changes" : "Create Budget"}
-                </button>
+                <ButtonLoader
+                  loading={submitting}
+                  label={editingId ? "Save Changes" : "Create Budget"}
+                />
                 <button
                   type="button"
                   onClick={resetForm}
@@ -318,21 +317,17 @@ export default function BudgetsPage() {
                 </button>
               </div>
             </form>
-          </div>
+          </FormCard>
         )}
 
         {loading ? (
           <p className="text-center text-gray-400 py-12">Loading...</p>
         ) : budgets.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-400 mb-2">No budgets yet</p>
-            <button
-              onClick={() => setShowForm(true)}
-              className="text-blue-600 text-sm hover:underline"
-            >
-              Create your first budget
-            </button>
-          </div>
+          <EmptyState
+            message="No budgets yet"
+            actionLabel="Create your first budget"
+            onAction={() => setShowForm(true)}
+          />
         ) : (
           <div className="space-y-3">
             {budgets.map((budget) => {

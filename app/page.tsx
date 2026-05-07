@@ -13,6 +13,9 @@ import {
   Legend,
 } from "recharts";
 import LogoutButton from "@/components/LogoutButton";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import Navbar from "@/components/Navbar";
+import PeriodSelector from "@/components/PeriodSelector";
 
 type Transaction = {
   id: string;
@@ -86,58 +89,10 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
-      <nav className="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
-        <h1 className="text-lg font-bold text-gray-800">💸 Expenses</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-500">
-            Hi, {session?.user?.name}
-          </span>
-          <Link
-            href="/transactions/add"
-            className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700"
-          >
-            + Add
-          </Link>
-          <Link
-            href="/history"
-            className="text-sm text-gray-600 hover:underline"
-          >
-            History
-          </Link>
-          <Link
-            href="/budgets"
-            className="text-sm text-gray-600 hover:underline"
-          >
-            Budgets
-          </Link>
-          <Link
-            href="/categories"
-            className="text-sm text-gray-600 hover:underline"
-          >
-            Categories
-          </Link>
-          <LogoutButton />
-        </div>
-      </nav>
+      <Navbar showUserLinks />
 
       <div className="max-w-5xl mx-auto p-6 space-y-6">
-        {/* Period Selector */}
-        <div className="flex gap-2">
-          {PERIODS.map((p) => (
-            <button
-              key={p}
-              onClick={() => setPeriod(p)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
-                period === p
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-600 border hover:bg-gray-50"
-              }`}
-            >
-              {p.charAt(0) + p.slice(1).toLowerCase()}
-            </button>
-          ))}
-        </div>
+        <PeriodSelector value={period} onChange={setPeriod} />
 
         {/* Summary Cards */}
         <div className="grid grid-cols-3 gap-4">
@@ -209,9 +164,9 @@ export default function DashboardPage() {
               </Link>
             </div>
             {loading ? (
-              <p className="text-gray-400 text-sm text-center py-12">
-                Loading...
-              </p>
+              <div className="flex justify-center py-12">
+                <LoadingSpinner size="md" />
+              </div>
             ) : transactions.length === 0 ? (
               <p className="text-gray-400 text-sm text-center py-12">
                 No transactions yet

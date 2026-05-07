@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ButtonLoader from "@/components/ButtonLoader";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -88,13 +89,11 @@ export default function RegisterPage() {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50"
-          >
-            {loading ? "Creating account..." : "Register"}
-          </button>
+          <ButtonLoader
+            loading={loading}
+            label="Register"
+            loadingLabel="Creating account..."
+          />
         </form>
 
         <p className="text-sm text-gray-500 text-center mt-4">

@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Navbar from "@/components/Navbar";
+import PeriodSelector from "@/components/PeriodSelector";
+import EmptyState from "@/components/EmptyState";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 type Transaction = {
   id: string;
@@ -69,37 +73,21 @@ export default function HistoryPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm px-6 py-4 flex items-center gap-4">
-        <Link href="/" className="text-gray-500 hover:text-gray-800">
-          ←
-        </Link>
-        <h1 className="text-lg font-bold text-gray-800">Transaction History</h1>
-        <div className="ml-auto">
+      <Navbar
+        title="Transaction History"
+        backHref="/"
+        actions={
           <Link
             href="/transactions/add"
             className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700"
           >
             + Add
           </Link>
-        </div>
-      </nav>
+        }
+      />
 
       <div className="max-w-2xl mx-auto p-6 space-y-4">
-        <div className="flex gap-2">
-          {PERIODS.map((p) => (
-            <button
-              key={p}
-              onClick={() => setPeriod(p)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
-                period === p
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-600 border hover:bg-gray-50"
-              }`}
-            >
-              {p.charAt(0) + p.slice(1).toLowerCase()}
-            </button>
-          ))}
-        </div>
+        <PeriodSelector value={period} onChange={setPeriod} />
 
         <div className="flex gap-2">
           {(["ALL", "INCOME", "EXPENSE"] as const).map((f) => (
@@ -122,17 +110,15 @@ export default function HistoryPage() {
         </div>
 
         {loading ? (
-          <p className="text-center text-gray-400 py-12">Loading...</p>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-400 mb-2">No transactions found</p>
-            <Link
-              href="/transactions/add"
-              className="text-blue-600 text-sm hover:underline"
-            >
-              Add your first transaction
-            </Link>
+          <div className="flex justify-center py-12">
+            <LoadingSpinner />
           </div>
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            message="No transactions found"
+            actionLabel="Add your first transaction"
+            actionHref="/transactions/add"
+          />
         ) : (
           Object.entries(grouped).map(([date, items]) => (
             <div key={date}>

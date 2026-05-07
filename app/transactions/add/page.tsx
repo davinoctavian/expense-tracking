@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ButtonLoader from "@/components/ButtonLoader";
+import FullscreenOverlay from "@/components/FullscreenOverlay";
+import Navbar from "@/components/Navbar";
+import FormCard from "@/components/FormCard";
+import ErrorMessage from "@/components/ErrorMessage";
 
 type Category = {
   id: string;
@@ -54,20 +59,12 @@ export default function AddTransactionPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm px-6 py-4 flex items-center gap-4">
-        <Link href="/" className="text-gray-500 hover:text-gray-800">
-          ←
-        </Link>
-        <h1 className="text-lg font-bold text-gray-800">Add Transaction</h1>
-      </nav>
+      <FullscreenOverlay show={loading} />
+      <Navbar title="Add Transaction" backHref="/" />
 
       <div className="max-w-lg mx-auto p-6">
-        <div className="bg-white rounded-2xl shadow-sm p-6">
-          {error && (
-            <p className="text-red-500 text-sm mb-4 bg-red-50 p-3 rounded-lg">
-              {error}
-            </p>
-          )}
+        <FormCard>
+          <ErrorMessage message={error} />
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -192,15 +189,13 @@ export default function AddTransactionPage() {
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition disabled:opacity-50"
-            >
-              {loading ? "Saving..." : "Save Transaction"}
-            </button>
+            <ButtonLoader
+              loading={loading}
+              label="Save Transaction"
+              loadingLabel="Saving..."
+            />
           </form>
-        </div>
+        </FormCard>
       </div>
     </div>
   );
