@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import EmptyState from "@/components/EmptyState";
 import FormCard from "@/components/FormCard";
 import ErrorMessage from "@/components/ErrorMessage";
+import { getIcon } from "@/lib/icons";
 
 type Category = {
   id: string;
@@ -243,7 +244,7 @@ export default function BudgetsPage() {
                           : "border-gray-200 hover:bg-gray-50 text-gray-600"
                       }`}
                     >
-                      {cat.icon && <span>{cat.icon}</span>}
+                      {cat.icon && <span>{getIcon(cat.icon)}</span>}
                       <span className="truncate">{cat.name}</span>
                     </button>
                   ))}
@@ -349,7 +350,7 @@ export default function BudgetsPage() {
                             (budget.category?.color ?? "#6366f1") + "33",
                         }}
                       >
-                        {budget.category?.icon ?? "📊"}
+                        {getIcon(budget.category?.icon ?? "general")}
                       </span>
                       <div>
                         <p className="text-sm font-semibold text-gray-800">

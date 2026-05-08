@@ -1,0 +1,25 @@
+export const ICON_MAP: Record<string, string> = {
+  food: "🍔",
+  pizza: "🍕",
+  car: "🚗",
+  home: "🏠",
+  health: "💊",
+  game: "🎮",
+  fashion: "👗",
+  travel: "✈️",
+  book: "📚",
+  electric: "💡",
+  shop: "🛒",
+  coffee: "☕",
+  music: "🎵",
+  money: "💰",
+  expense: "💸",
+  gym: "🏋️",
+  pet: "🐶",
+  gift: "🎁",
+  phone: "📱",
+  bill: "🧾",
+  general: "📊",
+};
+
+export const getIcon = (key: string | null) => ICON_MAP[key ?? "money"] ?? "💰";

@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import PeriodSelector from "@/components/PeriodSelector";
 import EmptyState from "@/components/EmptyState";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { getIcon } from "@/lib/icons";
 
 type Transaction = {
   id: string;
@@ -147,7 +148,9 @@ export default function HistoryPage() {
               <div className="bg-white rounded-2xl shadow-sm divide-y divide-gray-100">
                 {items.map((t) => (
                   <div key={t.id} className="flex items-center gap-3 px-4 py-3">
-                    <span className="text-xl">{t.category?.icon ?? "💰"}</span>
+                    <span className="text-xl">
+                      {getIcon(t.category?.icon ?? null)}
+                    </span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-800">
                         {t.category?.name ?? "Uncategorized"}

@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import EmptyState from "@/components/EmptyState";
 import FormCard from "@/components/FormCard";
 import ErrorMessage from "@/components/ErrorMessage";
+import { getIcon } from "@/lib/icons";
 
 type Category = {
   id: string;
@@ -14,29 +15,6 @@ type Category = {
   icon: string | null;
   color: string | null;
 };
-
-const EMOJI_OPTIONS = [
-  "🍔",
-  "🍕",
-  "🚗",
-  "🏠",
-  "💊",
-  "🎮",
-  "👗",
-  "✈️",
-  "📚",
-  "💡",
-  "🛒",
-  "☕",
-  "🎵",
-  "💰",
-  "💸",
-  "🏋️",
-  "🐶",
-  "🎁",
-  "📱",
-  "🧾",
-];
 
 const COLOR_OPTIONS = [
   "#6366f1",
@@ -58,7 +36,11 @@ export default function CategoriesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [form, setForm] = useState({ name: "", icon: "💰", color: "#6366f1" });
+  const [form, setForm] = useState({
+    name: "",
+    icon: "money",
+    color: "#6366f1",
+  });
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -73,7 +55,7 @@ export default function CategoriesPage() {
   };
 
   const resetForm = () => {
-    setForm({ name: "", icon: "💰", color: "#6366f1" });
+    setForm({ name: "", icon: "money", color: "#6366f1" });
     setEditingId(null);
     setShowForm(false);
     setError("");
@@ -107,7 +89,7 @@ export default function CategoriesPage() {
   const handleEdit = (cat: Category) => {
     setForm({
       name: cat.name,
-      icon: cat.icon ?? "💰",
+      icon: cat.icon ?? "money",
       color: cat.color ?? "#6366f1",
     });
     setEditingId(cat.id);
@@ -171,13 +153,13 @@ export default function CategoriesPage() {
                   Icon
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {EMOJI_OPTIONS.map((emoji) => (
+                  {Object.entries(getIcon).map(([key, emoji]) => (
                     <button
-                      key={emoji}
+                      key={key}
                       type="button"
-                      onClick={() => setForm({ ...form, icon: emoji })}
+                      onClick={() => setForm({ ...form, icon: key })}
                       className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center border-2 transition ${
-                        form.icon === emoji
+                        form.icon === key
                           ? "border-blue-500 bg-blue-50"
                           : "border-gray-200 hover:border-gray-300"
                       }`}
@@ -214,7 +196,7 @@ export default function CategoriesPage() {
                   className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
                   style={{ backgroundColor: form.color + "33" }}
                 >
-                  {form.icon}
+                  {getIcon(form.icon)}
                 </span>
                 <span className="text-sm font-medium text-gray-700">
                   {form.name || "Preview"}
@@ -254,7 +236,7 @@ export default function CategoriesPage() {
                   className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
                   style={{ backgroundColor: (cat.color ?? "#6366f1") + "33" }}
                 >
-                  {cat.icon ?? "💰"}
+                  {getIcon(cat.icon ?? null)}
                 </span>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-800">

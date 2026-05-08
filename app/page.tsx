@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   PieChart,
@@ -12,10 +11,10 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import LogoutButton from "@/components/LogoutButton";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Navbar from "@/components/Navbar";
 import PeriodSelector from "@/components/PeriodSelector";
+import { getIcon } from "@/lib/icons";
 
 type Transaction = {
   id: string;
@@ -40,7 +39,6 @@ type Period = (typeof PERIODS)[number];
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const router = useRouter();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [period, setPeriod] = useState<Period>("MONTHLY");
   const [loading, setLoading] = useState(true);
@@ -177,7 +175,7 @@ export default function DashboardPage() {
                   <div key={t.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">
-                        {t.category?.icon ?? "💰"}
+                        {getIcon(t.category?.icon ?? null)}
                       </span>
                       <div>
                         <p className="text-sm font-medium text-gray-700">

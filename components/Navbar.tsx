@@ -65,6 +65,12 @@ export default function Navbar({
             >
               Categories
             </Link>
+            <Link
+              href="/data"
+              className="text-sm text-gray-600 hover:underline"
+            >
+              Data
+            </Link>
             <LogoutButton />
           </div>
         </>

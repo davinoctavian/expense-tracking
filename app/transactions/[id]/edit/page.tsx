@@ -7,6 +7,7 @@ import FullscreenOverlay from "@/components/FullscreenOverlay";
 import Navbar from "@/components/Navbar";
 import FormCard from "@/components/FormCard";
 import ErrorMessage from "@/components/ErrorMessage";
+import { getIcon } from "@/lib/icons";
 
 type Category = {
   id: string;
@@ -171,7 +172,7 @@ export default function EditTransactionPage() {
                         : "border-gray-200 hover:bg-gray-50 text-gray-600"
                     }`}
                   >
-                    {cat.icon && <span>{cat.icon}</span>}
+                    {cat.icon && <span>{getIcon(cat.icon)}</span>}
                     <span className="truncate">{cat.name}</span>
                   </button>
                 ))}

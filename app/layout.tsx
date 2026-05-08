@@ -12,7 +12,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Expenses Tracker",
   description: "Track your daily expenses",
-  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -32,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="manifest" href="/api/manifest" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body
