@@ -33,10 +33,27 @@ export default function LoginPage() {
     router.push("/");
   };
 
+  const inputStyle = {
+    backgroundColor: "var(--bg)",
+    color: "var(--text)",
+    border: "1px solid var(--border)",
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Welcome Back</h1>
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{ backgroundColor: "var(--bg)" }}
+    >
+      <div
+        className="p-8 rounded-2xl shadow-md w-full max-w-md"
+        style={{ backgroundColor: "var(--bg-card)" }}
+      >
+        <h1
+          className="text-2xl font-bold mb-6"
+          style={{ color: "var(--text)" }}
+        >
+          Welcome Back
+        </h1>
 
         {error && (
           <p className="text-red-500 text-sm mb-4 bg-red-50 p-3 rounded-lg">
@@ -46,28 +63,36 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              className="block text-sm font-medium mb-1"
+              style={{ color: "var(--text)" }}
+            >
               Username
             </label>
             <input
               type="text"
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={inputStyle}
               placeholder="johndoe"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              className="block text-sm font-medium mb-1"
+              style={{ color: "var(--text)" }}
+            >
               Password
             </label>
             <input
               type="password"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={inputStyle}
               placeholder="••••••••"
               required
             />
@@ -80,9 +105,12 @@ export default function LoginPage() {
           />
         </form>
 
-        <p className="text-sm text-gray-500 text-center mt-4">
+        <p
+          className="text-sm text-center mt-4"
+          style={{ color: "var(--text-muted)" }}
+        >
           Don't have an account?{" "}
-          <Link href="/register" className="text-blue-600 hover:underline">
+          <Link href="/register" className="text-blue-500 hover:underline">
             Register
           </Link>
         </p>

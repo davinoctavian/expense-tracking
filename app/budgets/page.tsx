@@ -15,7 +15,6 @@ type Category = {
   icon: string | null;
   color: string | null;
 };
-
 type Budget = {
   id: string;
   amount: number;
@@ -25,7 +24,6 @@ type Budget = {
   categoryId: string | null;
   category: Category | null;
 };
-
 type Transaction = {
   amount: number;
   type: "INCOME" | "EXPENSE";
@@ -44,13 +42,10 @@ const fmt = (amount: number) =>
 
 const getPeriodDates = (period: Period) => {
   const now = new Date();
-  let startDate: Date;
-  let endDate: Date;
-
+  let startDate: Date, endDate: Date;
   if (period === "WEEKLY") {
-    const day = now.getDay();
     startDate = new Date(now);
-    startDate.setDate(now.getDate() - day);
+    startDate.setDate(now.getDate() - now.getDay());
     endDate = new Date(startDate);
     endDate.setDate(startDate.getDate() + 6);
   } else if (period === "MONTHLY") {
@@ -60,7 +55,6 @@ const getPeriodDates = (period: Period) => {
     startDate = new Date(now.getFullYear(), 0, 1);
     endDate = new Date(now.getFullYear(), 11, 31);
   }
-
   return {
     startDate: startDate.toISOString().split("T")[0],
     endDate: endDate.toISOString().split("T")[0],
@@ -76,14 +70,13 @@ export default function BudgetsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     amount: "",
     period: "MONTHLY" as Period,
     categoryId: "",
-    startDate: getPeriodDates("MONTHLY").startDate,
-    endDate: getPeriodDates("MONTHLY").endDate,
+    ...getPeriodDates("MONTHLY"),
   });
-  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchAll();
@@ -91,64 +84,61 @@ export default function BudgetsPage() {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [budgetsRes, categoriesRes, transactionsRes] = await Promise.all([
+    const [b, c, t] = await Promise.all([
       fetch("/api/budgets"),
       fetch("/api/categories"),
       fetch("/api/transactions?period=YEARLY"),
     ]);
-    if (budgetsRes.ok) setBudgets(await budgetsRes.json());
-    if (categoriesRes.ok) setCategories(await categoriesRes.json());
-    if (transactionsRes.ok) setTransactions(await transactionsRes.json());
+    if (b.ok) setBudgets(await b.json());
+    if (c.ok) setCategories(await c.json());
+    if (t.ok) setTransactions(await t.json());
     setLoading(false);
   };
 
   const resetForm = () => {
-    const dates = getPeriodDates("MONTHLY");
-    setForm({ amount: "", period: "MONTHLY", categoryId: "", ...dates });
+    setForm({
+      amount: "",
+      period: "MONTHLY",
+      categoryId: "",
+      ...getPeriodDates("MONTHLY"),
+    });
     setEditingId(null);
     setShowForm(false);
     setError("");
   };
 
-  const handlePeriodChange = (period: Period) => {
-    const dates = getPeriodDates(period);
-    setForm({ ...form, period, ...dates });
-  };
+  const handlePeriodChange = (period: Period) =>
+    setForm({ ...form, period, ...getPeriodDates(period) });
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setError("");
-
     const url = editingId ? `/api/budgets/${editingId}` : "/api/budgets";
-    const method = editingId ? "PUT" : "POST";
-
     const res = await fetch(url, {
-      method,
+      method: editingId ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
-
+    setSubmitting(false);
     if (!res.ok) {
       const data = await res.json();
       setError(data.error ?? "Something went wrong");
       return;
     }
-
     resetForm();
     fetchAll();
-    setSubmitting(false);
   };
 
-  const handleEdit = (budget: Budget) => {
+  const handleEdit = (b: Budget) => {
     setForm({
-      amount: budget.amount.toString(),
-      period: budget.period,
-      categoryId: budget?.category?.id || "",
-      startDate: new Date(budget.startDate).toISOString().split("T")[0],
-      endDate: new Date(budget.endDate).toISOString().split("T")[0],
+      amount: b.amount.toString(),
+      period: b.period,
+      categoryId: b.category?.id ?? "",
+      startDate: new Date(b.startDate).toISOString().split("T")[0],
+      endDate: new Date(b.endDate).toISOString().split("T")[0],
     });
-    setEditingId(budget.id);
+    setEditingId(b.id);
     setShowForm(true);
   };
 
@@ -160,18 +150,25 @@ export default function BudgetsPage() {
     fetchAll();
   };
 
-  const getSpent = (budget: Budget) => {
-    return transactions
-      .filter((t) => {
-        if (t.type !== "EXPENSE") return false;
-        if (budget.category) return t.categoryId === budget.category.id;
-        return true; // no category = count all expenses
-      })
+  const getSpent = (budget: Budget) =>
+    transactions
+      .filter(
+        (t) =>
+          t.type === "EXPENSE" &&
+          (budget.category ? t.categoryId === budget.category.id : true),
+      )
       .reduce((sum, t) => sum + t.amount, 0);
+
+  const inputStyle = {
+    backgroundColor: "var(--bg)",
+    color: "var(--text)",
+    border: "1px solid var(--border)",
   };
+  const labelStyle = { color: "var(--text)" };
+  const mutedStyle = { color: "var(--text-muted)" };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg)" }}>
       <FullscreenOverlay show={submitting} />
       <Navbar
         title="Budgets"
@@ -182,7 +179,7 @@ export default function BudgetsPage() {
               resetForm();
               setShowForm(true);
             }}
-            className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700"
+            className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 cursor-pointer"
           >
             + New Budget
           </button>
@@ -193,23 +190,33 @@ export default function BudgetsPage() {
         {showForm && (
           <FormCard title={editingId ? "Edit Budget" : "New Budget"}>
             <ErrorMessage message={error} />
-
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Period */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={labelStyle}
+                >
                   Period
                 </label>
-                <div className="flex rounded-xl overflow-hidden border border-gray-200">
+                <div
+                  className="flex rounded-xl overflow-hidden"
+                  style={{ border: "1px solid var(--border)" }}
+                >
                   {PERIODS.map((p) => (
                     <button
                       key={p}
                       type="button"
                       onClick={() => handlePeriodChange(p)}
-                      className={`flex-1 py-2.5 text-sm font-medium transition ${
+                      className="flex-1 py-2.5 text-sm font-medium transition cursor-pointer"
+                      style={
                         form.period === p
-                          ? "bg-blue-600 text-white"
-                          : "bg-white text-gray-600 hover:bg-gray-50"
-                      }`}
+                          ? { backgroundColor: "#2563eb", color: "white" }
+                          : {
+                              backgroundColor: "var(--bg-card)",
+                              color: "var(--text-muted)",
+                            }
+                      }
                     >
                       {p.charAt(0) + p.slice(1).toLowerCase()}
                     </button>
@@ -217,32 +224,38 @@ export default function BudgetsPage() {
                 </div>
               </div>
 
+              {/* Category */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category <span className="text-gray-400">(optional)</span>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={labelStyle}
+                >
+                  Category <span style={mutedStyle}>(optional)</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, categoryId: "" })}
-                    className={`py-2 px-3 rounded-xl text-sm border transition ${
-                      form.categoryId === ""
-                        ? "border-blue-500 bg-blue-50 text-blue-700"
-                        : "border-gray-200 hover:bg-gray-50 text-gray-600"
-                    }`}
-                  >
-                    None
-                  </button>
-                  {categories.map((cat) => (
+                  {[
+                    { id: "", name: "None", icon: null, color: null },
+                    ...categories,
+                  ].map((cat) => (
                     <button
                       key={cat.id}
                       type="button"
                       onClick={() => setForm({ ...form, categoryId: cat.id })}
-                      className={`py-2 px-3 rounded-xl text-sm border transition flex items-center gap-1.5 ${
-                        form.categoryId === cat.id
-                          ? "border-blue-500 bg-blue-50 text-blue-700"
-                          : "border-gray-200 hover:bg-gray-50 text-gray-600"
-                      }`}
+                      className="py-2 px-3 rounded-xl text-sm transition cursor-pointer flex items-center gap-1.5"
+                      style={{
+                        border:
+                          form.categoryId === cat.id
+                            ? "1px solid #3b82f6"
+                            : "1px solid var(--border)",
+                        backgroundColor:
+                          form.categoryId === cat.id
+                            ? "#eff6ff"
+                            : "var(--bg-card)",
+                        color:
+                          form.categoryId === cat.id
+                            ? "#1d4ed8"
+                            : "var(--text)",
+                      }}
                     >
                       {cat.icon && <span>{getIcon(cat.icon)}</span>}
                       <span className="truncate">{cat.name}</span>
@@ -251,12 +264,19 @@ export default function BudgetsPage() {
                 </div>
               </div>
 
+              {/* Amount */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  className="block text-sm font-medium mb-1"
+                  style={labelStyle}
+                >
                   Budget Amount
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                  <span
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-sm"
+                    style={mutedStyle}
+                  >
                     Rp
                   </span>
                   <input
@@ -265,7 +285,8 @@ export default function BudgetsPage() {
                     onChange={(e) =>
                       setForm({ ...form, amount: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={inputStyle}
                     placeholder="0"
                     min="0"
                     required
@@ -273,35 +294,28 @@ export default function BudgetsPage() {
                 </div>
               </div>
 
+              {/* Dates */}
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    value={form.startDate}
-                    onChange={(e) =>
-                      setForm({ ...form, startDate: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    value={form.endDate}
-                    onChange={(e) =>
-                      setForm({ ...form, endDate: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
+                {(["startDate", "endDate"] as const).map((field) => (
+                  <div key={field}>
+                    <label
+                      className="block text-sm font-medium mb-1"
+                      style={labelStyle}
+                    >
+                      {field === "startDate" ? "Start Date" : "End Date"}
+                    </label>
+                    <input
+                      type="date"
+                      value={form[field]}
+                      onChange={(e) =>
+                        setForm({ ...form, [field]: e.target.value })
+                      }
+                      className="w-full rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      style={inputStyle}
+                      required
+                    />
+                  </div>
+                ))}
               </div>
 
               <div className="flex gap-2">
@@ -312,7 +326,12 @@ export default function BudgetsPage() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-4 py-2.5 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition"
+                  className="px-4 py-2.5 rounded-xl transition cursor-pointer"
+                  style={{
+                    border: "1px solid var(--border)",
+                    color: "var(--text-muted)",
+                    backgroundColor: "var(--bg-card)",
+                  }}
                 >
                   Cancel
                 </button>
@@ -322,7 +341,9 @@ export default function BudgetsPage() {
         )}
 
         {loading ? (
-          <p className="text-center text-gray-400 py-12">Loading...</p>
+          <div className="flex justify-center py-12">
+            <ButtonLoader loading label="" />
+          </div>
         ) : budgets.length === 0 ? (
           <EmptyState
             message="No budgets yet"
@@ -335,11 +356,14 @@ export default function BudgetsPage() {
               const spent = getSpent(budget);
               const percent = Math.min((spent / budget.amount) * 100, 100);
               const isOver = spent > budget.amount;
-
               return (
                 <div
                   key={budget.id}
-                  className="bg-white rounded-2xl shadow-sm p-5"
+                  className="rounded-2xl shadow-sm p-5"
+                  style={{
+                    backgroundColor: "var(--bg-card)",
+                    border: "1px solid var(--border)",
+                  }}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -350,13 +374,16 @@ export default function BudgetsPage() {
                             (budget.category?.color ?? "#6366f1") + "33",
                         }}
                       >
-                        {getIcon(budget.category?.icon ?? "general")}
+                        {getIcon(budget.category?.icon ?? null)}
                       </span>
                       <div>
-                        <p className="text-sm font-semibold text-gray-800">
+                        <p
+                          className="text-sm font-semibold"
+                          style={{ color: "var(--text)" }}
+                        >
                           {budget.category?.name ?? "General Budget"}
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs" style={mutedStyle}>
                           {budget.period.charAt(0) +
                             budget.period.slice(1).toLowerCase()}{" "}
                           ·{" "}
@@ -371,50 +398,50 @@ export default function BudgetsPage() {
                     <div className="flex gap-1">
                       <button
                         onClick={() => handleEdit(budget)}
-                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                        className="p-1.5 rounded-lg transition cursor-pointer"
+                        style={mutedStyle}
                       >
                         ✏️
                       </button>
                       <button
                         onClick={() => handleDelete(budget.id)}
                         disabled={deleteId === budget.id}
-                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
+                        className="p-1.5 rounded-lg transition cursor-pointer disabled:opacity-50"
+                        style={mutedStyle}
                       >
                         🗑️
                       </button>
                     </div>
                   </div>
-
-                  {/* Progress Bar */}
                   <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs text-gray-500">
+                    <div
+                      className="flex justify-between text-xs"
+                      style={mutedStyle}
+                    >
                       <span>Spent: {fmt(spent)}</span>
                       <span>Budget: {fmt(budget.amount)}</span>
                     </div>
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-2 rounded-full overflow-hidden"
+                      style={{ backgroundColor: "var(--border)" }}
+                    >
                       <div
-                        className={`h-full rounded-full transition-all ${
-                          isOver
-                            ? "bg-red-500"
-                            : percent > 80
-                              ? "bg-yellow-400"
-                              : "bg-green-500"
-                        }`}
+                        className={`h-full rounded-full transition-all ${isOver ? "bg-red-500" : percent > 80 ? "bg-yellow-400" : "bg-green-500"}`}
                         style={{ width: `${percent}%` }}
                       />
                     </div>
                     <div className="flex justify-between text-xs">
                       <span
-                        className={
-                          isOver ? "text-red-500 font-medium" : "text-gray-400"
-                        }
+                        className={isOver ? "text-red-500 font-medium" : ""}
+                        style={!isOver ? mutedStyle : {}}
                       >
                         {isOver
                           ? `Over by ${fmt(spent - budget.amount)}`
                           : `${fmt(budget.amount - spent)} remaining`}
                       </span>
                       <span
-                        className={isOver ? "text-red-500" : "text-gray-400"}
+                        className={isOver ? "text-red-500" : ""}
+                        style={!isOver ? mutedStyle : {}}
                       >
                         {Math.round(percent)}%
                       </span>

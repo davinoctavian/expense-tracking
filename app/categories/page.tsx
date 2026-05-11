@@ -7,7 +7,7 @@ import Navbar from "@/components/Navbar";
 import EmptyState from "@/components/EmptyState";
 import FormCard from "@/components/FormCard";
 import ErrorMessage from "@/components/ErrorMessage";
-import { getIcon } from "@/lib/icons";
+import { getIcon, ICON_MAP } from "@/lib/icons";
 
 type Category = {
   id: string;
@@ -36,12 +36,12 @@ export default function CategoriesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     name: "",
     icon: "money",
     color: "#6366f1",
   });
-  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -65,25 +65,21 @@ export default function CategoriesPage() {
     e.preventDefault();
     setSubmitting(true);
     setError("");
-
     const url = editingId ? `/api/categories/${editingId}` : "/api/categories";
     const method = editingId ? "PUT" : "POST";
-
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
-
     const data = await res.json();
+    setSubmitting(false);
     if (!res.ok) {
       setError(data.error);
       return;
     }
-
     resetForm();
     fetchCategories();
-    setSubmitting(false);
   };
 
   const handleEdit = (cat: Category) => {
@@ -109,8 +105,15 @@ export default function CategoriesPage() {
     fetchCategories();
   };
 
+  const inputStyle = {
+    backgroundColor: "var(--bg)",
+    color: "var(--text)",
+    border: "1px solid var(--border)",
+  };
+  const labelStyle = { color: "var(--text)" };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg)" }}>
       <FullscreenOverlay show={submitting} />
       <Navbar
         title="Categories"
@@ -121,7 +124,7 @@ export default function CategoriesPage() {
               resetForm();
               setShowForm(true);
             }}
-            className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700"
+            className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 cursor-pointer"
           >
             + New
           </button>
@@ -132,37 +135,47 @@ export default function CategoriesPage() {
         {showForm && (
           <FormCard title={editingId ? "Edit Category" : "New Category"}>
             <ErrorMessage message={error} />
-
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  className="block text-sm font-medium mb-1"
+                  style={labelStyle}
+                >
                   Name
                 </label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={inputStyle}
                   placeholder="e.g. Food, Transport"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={labelStyle}
+                >
                   Icon
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {Object.entries(getIcon).map(([key, emoji]) => (
+                  {Object.entries(ICON_MAP).map(([key, emoji]) => (
                     <button
                       key={key}
                       type="button"
                       onClick={() => setForm({ ...form, icon: key })}
-                      className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center border-2 transition ${
-                        form.icon === key
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
+                      className="w-10 h-10 rounded-xl text-xl flex items-center justify-center transition cursor-pointer"
+                      style={{
+                        border:
+                          form.icon === key
+                            ? "2px solid #3b82f6"
+                            : "2px solid var(--border)",
+                        backgroundColor:
+                          form.icon === key ? "#eff6ff" : "var(--bg-card)",
+                      }}
                     >
                       {emoji}
                     </button>
@@ -171,7 +184,10 @@ export default function CategoriesPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={labelStyle}
+                >
                   Color
                 </label>
                 <div className="flex gap-2">
@@ -180,25 +196,36 @@ export default function CategoriesPage() {
                       key={color}
                       type="button"
                       onClick={() => setForm({ ...form, color })}
-                      className={`w-8 h-8 rounded-full border-4 transition ${
-                        form.color === color
-                          ? "border-gray-800 scale-110"
-                          : "border-transparent"
-                      }`}
-                      style={{ backgroundColor: color }}
+                      className="w-8 h-8 rounded-full transition cursor-pointer"
+                      style={{
+                        backgroundColor: color,
+                        border:
+                          form.color === color
+                            ? "3px solid var(--text)"
+                            : "3px solid transparent",
+                        transform:
+                          form.color === color ? "scale(1.1)" : "scale(1)",
+                      }}
                     />
                   ))}
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+              {/* Preview */}
+              <div
+                className="flex items-center gap-3 p-3 rounded-xl"
+                style={{ backgroundColor: "var(--bg)" }}
+              >
                 <span
                   className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
                   style={{ backgroundColor: form.color + "33" }}
                 >
                   {getIcon(form.icon)}
                 </span>
-                <span className="text-sm font-medium text-gray-700">
+                <span
+                  className="text-sm font-medium"
+                  style={{ color: "var(--text)" }}
+                >
                   {form.name || "Preview"}
                 </span>
               </div>
@@ -211,7 +238,12 @@ export default function CategoriesPage() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-4 py-2.5 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition"
+                  className="px-4 py-2.5 rounded-xl transition cursor-pointer"
+                  style={{
+                    border: "1px solid var(--border)",
+                    color: "var(--text-muted)",
+                    backgroundColor: "var(--bg-card)",
+                  }}
                 >
                   Cancel
                 </button>
@@ -221,7 +253,9 @@ export default function CategoriesPage() {
         )}
 
         {loading ? (
-          <p className="text-center text-gray-400 py-12">Loading...</p>
+          <div className="flex justify-center py-12">
+            <ButtonLoader loading label="" />
+          </div>
         ) : categories.length === 0 ? (
           <EmptyState
             message="No categories yet"
@@ -229,9 +263,21 @@ export default function CategoriesPage() {
             onAction={() => setShowForm(true)}
           />
         ) : (
-          <div className="bg-white rounded-2xl shadow-sm divide-y divide-gray-100">
-            {categories.map((cat) => (
-              <div key={cat.id} className="flex items-center gap-3 px-4 py-3">
+          <div
+            className="rounded-2xl shadow-sm overflow-hidden"
+            style={{
+              backgroundColor: "var(--bg-card)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            {categories.map((cat, i) => (
+              <div
+                key={cat.id}
+                className="flex items-center gap-3 px-4 py-3"
+                style={{
+                  borderTop: i > 0 ? "1px solid var(--border)" : "none",
+                }}
+              >
                 <span
                   className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
                   style={{ backgroundColor: (cat.color ?? "#6366f1") + "33" }}
@@ -239,21 +285,26 @@ export default function CategoriesPage() {
                   {getIcon(cat.icon ?? null)}
                 </span>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-800">
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: "var(--text)" }}
+                  >
                     {cat.name}
                   </p>
                 </div>
                 <div className="flex gap-1">
                   <button
                     onClick={() => handleEdit(cat)}
-                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                    className="p-1.5 rounded-lg transition cursor-pointer"
+                    style={{ color: "var(--text-muted)" }}
                   >
                     ✏️
                   </button>
                   <button
                     onClick={() => handleDelete(cat.id)}
                     disabled={deleteId === cat.id}
-                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
+                    className="p-1.5 rounded-lg transition cursor-pointer disabled:opacity-50"
+                    style={{ color: "var(--text-muted)" }}
                   >
                     🗑️
                   </button>

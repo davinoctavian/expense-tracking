@@ -15,7 +15,7 @@ export default function ButtonLoader({
   label,
   loadingLabel = "Loading...",
   disabled,
-  className = "w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition disabled:opacity-50",
+  className = "w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer",
   type = "submit",
   onClick,
 }: Props) {

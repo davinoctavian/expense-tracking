@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import LogoutButton from "@/components/LogoutButton";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 type User = {
   id: string;
@@ -24,10 +25,7 @@ export default function AdminPage() {
 
   const fetchUsers = async () => {
     const res = await fetch("/api/admin/users");
-    if (res.ok) {
-      const data = await res.json();
-      setUsers(data);
-    }
+    if (res.ok) setUsers(await res.json());
     setLoading(false);
   };
 
@@ -53,26 +51,32 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "var(--bg)" }}
+      >
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen p-6" style={{ backgroundColor: "var(--bg)" }}>
       <div className="max-w-5xl mx-auto">
+        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Super Admin</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-2xl font-bold" style={{ color: "var(--text)" }}>
+              Super Admin
+            </h1>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
               {users.length} registered users
             </p>
           </div>
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push("/")}
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm text-blue-500 hover:underline cursor-pointer"
             >
               ← Back to App
             </button>
@@ -80,71 +84,146 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        {/* Table */}
+        <div
+          className="rounded-2xl shadow-sm overflow-hidden"
+          style={{
+            backgroundColor: "var(--bg-card)",
+            border: "1px solid var(--border)",
+          }}
+        >
           <table className="w-full text-sm">
-            <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
-              <tr>
-                <th className="px-6 py-3 text-left">User</th>
-                <th className="px-6 py-3 text-left">Username</th>
-                <th className="px-6 py-3 text-center">Transactions</th>
-                <th className="px-6 py-3 text-center">Categories</th>
-                <th className="px-6 py-3 text-center">Budgets</th>
-                <th className="px-6 py-3 text-center">Joined</th>
-                <th className="px-6 py-3 text-center">Actions</th>
+            <thead>
+              <tr
+                style={{
+                  backgroundColor: "var(--bg)",
+                  borderBottom: "1px solid var(--border)",
+                }}
+              >
+                {[
+                  "User",
+                  "Username",
+                  "Transactions",
+                  "Categories",
+                  "Budgets",
+                  "Joined",
+                  "Actions",
+                ].map((h) => (
+                  <th
+                    key={h}
+                    className={`px-6 py-3 text-xs font-semibold uppercase tracking-wide ${
+                      h === "User" || h === "Username"
+                        ? "text-left"
+                        : "text-center"
+                    }`}
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-medium text-gray-800">
-                    {user.name}
-                  </td>
-                  <td className="px-6 py-4 text-gray-500">@{user.username}</td>
-                  <td className="px-6 py-4 text-center">
-                    {user._count.transactions}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    {user._count.categories}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    {user._count.budgets}
-                  </td>
-                  <td className="px-6 py-4 text-center text-gray-500">
-                    {new Date(user.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <div className="flex gap-2 justify-center">
-                      <button
-                        onClick={() => handleDeleteData(user.id, user.name)}
-                        disabled={actionLoading === user.id + "-data"}
-                        className="px-3 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 disabled:opacity-50"
-                      >
-                        {actionLoading === user.id + "-data"
-                          ? "Clearing..."
-                          : "Clear Data"}
-                      </button>
-                      <button
-                        onClick={() => handleDeleteAccount(user.id, user.name)}
-                        disabled={actionLoading === user.id + "-account"}
-                        className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded-lg hover:bg-red-200 disabled:opacity-50"
-                      >
-                        {actionLoading === user.id + "-account"
-                          ? "Deleting..."
-                          : "Delete"}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {users.length === 0 && (
+            <tbody>
+              {users.length === 0 ? (
                 <tr>
                   <td
                     colSpan={7}
-                    className="px-6 py-8 text-center text-gray-400"
+                    className="px-6 py-8 text-center"
+                    style={{ color: "var(--text-muted)" }}
                   >
                     No users found
                   </td>
                 </tr>
+              ) : (
+                users.map((user, i) => (
+                  <tr
+                    key={user.id}
+                    style={{
+                      borderTop: i > 0 ? "1px solid var(--border)" : "none",
+                    }}
+                  >
+                    <td
+                      className="px-6 py-4 font-medium"
+                      style={{ color: "var(--text)" }}
+                    >
+                      {user.name}
+                    </td>
+                    <td
+                      className="px-6 py-4"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      @{user.username}
+                    </td>
+                    <td
+                      className="px-6 py-4 text-center"
+                      style={{ color: "var(--text)" }}
+                    >
+                      {user._count.transactions}
+                    </td>
+                    <td
+                      className="px-6 py-4 text-center"
+                      style={{ color: "var(--text)" }}
+                    >
+                      {user._count.categories}
+                    </td>
+                    <td
+                      className="px-6 py-4 text-center"
+                      style={{ color: "var(--text)" }}
+                    >
+                      {user._count.budgets}
+                    </td>
+                    <td
+                      className="px-6 py-4 text-center"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2 justify-center">
+                        <button
+                          onClick={() => handleDeleteData(user.id, user.name)}
+                          disabled={actionLoading === user.id + "-data"}
+                          className="px-3 py-1 text-xs rounded-lg transition cursor-pointer disabled:opacity-50"
+                          style={{
+                            backgroundColor: "#fef9c3",
+                            color: "#a16207",
+                          }}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.backgroundColor = "#fef08a")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.backgroundColor = "#fef9c3")
+                          }
+                        >
+                          {actionLoading === user.id + "-data"
+                            ? "Clearing..."
+                            : "Clear Data"}
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleDeleteAccount(user.id, user.name)
+                          }
+                          disabled={actionLoading === user.id + "-account"}
+                          className="px-3 py-1 text-xs rounded-lg transition cursor-pointer disabled:opacity-50"
+                          style={{
+                            backgroundColor: "#fee2e2",
+                            color: "#b91c1c",
+                          }}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.backgroundColor = "#fecaca")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.backgroundColor = "#fee2e2")
+                          }
+                        >
+                          {actionLoading === user.id + "-account"
+                            ? "Deleting..."
+                            : "Delete"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>

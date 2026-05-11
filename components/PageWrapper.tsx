@@ -12,7 +12,7 @@ const widths = {
 
 export default function PageWrapper({ children, maxWidth = "md" }: Props) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg)" }}>
       <div className={`${widths[maxWidth]} mx-auto p-6 space-y-4`}>
         {children}
       </div>

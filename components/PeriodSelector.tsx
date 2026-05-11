@@ -1,10 +1,7 @@
 const PERIODS = ["WEEKLY", "MONTHLY", "YEARLY"] as const;
 export type Period = (typeof PERIODS)[number];
 
-type Props = {
-  value: Period;
-  onChange: (period: Period) => void;
-};
+type Props = { value: Period; onChange: (period: Period) => void };
 
 export default function PeriodSelector({ value, onChange }: Props) {
   return (
@@ -13,11 +10,12 @@ export default function PeriodSelector({ value, onChange }: Props) {
         <button
           key={p}
           onClick={() => onChange(p)}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
-            value === p
-              ? "bg-blue-600 text-white"
-              : "bg-white text-gray-600 border hover:bg-gray-50"
-          }`}
+          className="px-4 py-1.5 rounded-full text-sm font-medium transition cursor-pointer"
+          style={{
+            backgroundColor: value === p ? "#2563eb" : "var(--bg-card)",
+            color: value === p ? "white" : "var(--text-muted)",
+            border: "1px solid var(--border)",
+          }}
         >
           {p.charAt(0) + p.slice(1).toLowerCase()}
         </button>

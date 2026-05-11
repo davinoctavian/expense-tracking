@@ -15,11 +15,13 @@ export default function EmptyState({
 }: Props) {
   return (
     <div className="text-center py-12">
-      <p className="text-gray-400 mb-2">{message}</p>
+      <p className="mb-2" style={{ color: "var(--text-muted)" }}>
+        {message}
+      </p>
       {actionLabel && actionHref && (
         <Link
           href={actionHref}
-          className="text-blue-600 text-sm hover:underline"
+          className="text-blue-500 text-sm hover:underline"
         >
           {actionLabel}
         </Link>
@@ -27,7 +29,7 @@ export default function EmptyState({
       {actionLabel && onAction && (
         <button
           onClick={onAction}
-          className="text-blue-600 text-sm hover:underline"
+          className="text-blue-500 text-sm hover:underline cursor-pointer"
         >
           {actionLabel}
         </button>

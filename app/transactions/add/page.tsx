@@ -58,8 +58,24 @@ export default function AddTransactionPage() {
     router.push("/");
   };
 
+  const inputClass =
+    "w-full rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition";
+  const inputStyle = {
+    backgroundColor: "var(--bg)",
+    color: "var(--text)",
+    border: "1px solid var(--border)",
+  };
+
+  const labelStyle = {
+    color: "var(--text)",
+  };
+
+  const mutedStyle = {
+    color: "var(--text-muted)",
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg)" }}>
       <FullscreenOverlay show={loading} />
       <Navbar title="Add Transaction" backHref="/" />
 
@@ -68,49 +84,76 @@ export default function AddTransactionPage() {
           <ErrorMessage message={error} />
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Type */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                className="block text-sm font-medium mb-2"
+                style={labelStyle}
+              >
                 Type
               </label>
-              <div className="flex rounded-xl overflow-hidden border border-gray-200">
+              <div
+                className="flex rounded-xl overflow-hidden border"
+                style={{ borderColor: "var(--border)" }}
+              >
                 <button
                   type="button"
                   onClick={() => setForm({ ...form, type: "EXPENSE" })}
-                  className={`flex-1 py-2.5 text-sm font-medium transition ${
-                    form.type === "EXPENSE"
-                      ? "bg-red-500 text-white"
-                      : "bg-white text-gray-600 hover:bg-gray-50"
+                  className={`flex-1 py-2.5 text-sm font-medium transition cursor-pointer ${
+                    form.type === "EXPENSE" ? "bg-red-500 text-white" : ""
                   }`}
+                  style={
+                    form.type !== "EXPENSE"
+                      ? {
+                          backgroundColor: "var(--bg-card)",
+                          color: "var(--text-muted)",
+                        }
+                      : {}
+                  }
                 >
                   Expense
                 </button>
                 <button
                   type="button"
                   onClick={() => setForm({ ...form, type: "INCOME" })}
-                  className={`flex-1 py-2.5 text-sm font-medium transition ${
-                    form.type === "INCOME"
-                      ? "bg-green-500 text-white"
-                      : "bg-white text-gray-600 hover:bg-gray-50"
+                  className={`flex-1 py-2.5 text-sm font-medium transition cursor-pointer ${
+                    form.type === "INCOME" ? "bg-green-500 text-white" : ""
                   }`}
+                  style={
+                    form.type !== "INCOME"
+                      ? {
+                          backgroundColor: "var(--bg-card)",
+                          color: "var(--text-muted)",
+                        }
+                      : {}
+                  }
                 >
                   Income
                 </button>
               </div>
             </div>
 
+            {/* Amount */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className="block text-sm font-medium mb-1"
+                style={labelStyle}
+              >
                 Amount
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                <span
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-sm"
+                  style={mutedStyle}
+                >
                   Rp
                 </span>
                 <input
                   type="number"
                   value={form.amount}
                   onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`${inputClass} pl-10 pr-4`}
+                  style={inputStyle}
                   placeholder="0"
                   min="0"
                   required
@@ -118,29 +161,44 @@ export default function AddTransactionPage() {
               </div>
             </div>
 
+            {/* Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                className="block text-sm font-medium mb-1"
+                style={labelStyle}
+              >
                 Date
               </label>
               <input
                 type="date"
                 value={form.date}
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={inputClass}
+                style={inputStyle}
                 required
               />
             </div>
 
+            {/* Category */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category <span className="text-gray-400">(optional)</span>
+              <label
+                className="block text-sm font-medium mb-1"
+                style={labelStyle}
+              >
+                Category <span style={mutedStyle}>(optional)</span>
               </label>
               {categories.length === 0 ? (
-                <div className="text-sm text-gray-400 border border-dashed border-gray-300 rounded-lg p-3 text-center">
+                <div
+                  className="text-sm rounded-lg p-3 text-center border border-dashed"
+                  style={{
+                    color: "var(--text-muted)",
+                    borderColor: "var(--border)",
+                  }}
+                >
                   No categories yet.{" "}
                   <Link
                     href="/categories"
-                    className="text-blue-600 hover:underline"
+                    className="text-blue-500 hover:underline cursor-pointer"
                   >
                     Create one
                   </Link>
@@ -150,11 +208,17 @@ export default function AddTransactionPage() {
                   <button
                     type="button"
                     onClick={() => setForm({ ...form, categoryId: "" })}
-                    className={`py-2 px-3 rounded-xl text-sm border transition ${
-                      form.categoryId === ""
-                        ? "border-blue-500 bg-blue-50 text-blue-700"
-                        : "border-gray-200 hover:bg-gray-50 text-gray-600"
-                    }`}
+                    className="py-2 px-3 rounded-xl text-sm border transition cursor-pointer"
+                    style={{
+                      borderColor:
+                        form.categoryId === "" ? "#3b82f6" : "var(--border)",
+                      backgroundColor:
+                        form.categoryId === "" ? "#eff6ff" : "var(--bg-card)",
+                      color:
+                        form.categoryId === ""
+                          ? "#1d4ed8"
+                          : "var(--text-muted)",
+                    }}
                   >
                     None
                   </button>
@@ -163,11 +227,21 @@ export default function AddTransactionPage() {
                       key={cat.id}
                       type="button"
                       onClick={() => setForm({ ...form, categoryId: cat.id })}
-                      className={`py-2 px-3 rounded-xl text-sm border transition flex items-center gap-1.5 ${
-                        form.categoryId === cat.id
-                          ? "border-blue-500 bg-blue-50 text-blue-700"
-                          : "border-gray-200 hover:bg-gray-50 text-gray-600"
-                      }`}
+                      className="py-2 px-3 rounded-xl text-sm border transition cursor-pointer flex items-center gap-1.5"
+                      style={{
+                        borderColor:
+                          form.categoryId === cat.id
+                            ? "#3b82f6"
+                            : "var(--border)",
+                        backgroundColor:
+                          form.categoryId === cat.id
+                            ? "#eff6ff"
+                            : "var(--bg-card)",
+                        color:
+                          form.categoryId === cat.id
+                            ? "#1d4ed8"
+                            : "var(--text)",
+                      }}
                     >
                       {cat.icon && <span>{getIcon(cat.icon)}</span>}
                       <span className="truncate">{cat.name}</span>
@@ -177,14 +251,19 @@ export default function AddTransactionPage() {
               )}
             </div>
 
+            {/* Note */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Note <span className="text-gray-400">(optional)</span>
+              <label
+                className="block text-sm font-medium mb-1"
+                style={labelStyle}
+              >
+                Note <span style={mutedStyle}>(optional)</span>
               </label>
               <textarea
                 value={form.note}
                 onChange={(e) => setForm({ ...form, note: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="w-full rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition"
+                style={inputStyle}
                 placeholder="What was this for?"
                 rows={3}
               />

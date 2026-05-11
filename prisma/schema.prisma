@@ -11,6 +11,7 @@ model User {
   name         String
   username     String        @unique
   password     String
+  theme        String        @default("light")
   categories   Category[]
   budgets      Budget[]
   transactions Transaction[]

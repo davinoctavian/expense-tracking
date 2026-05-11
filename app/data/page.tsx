@@ -12,7 +12,6 @@ type Category = {
   icon: string | null;
   color: string | null;
 };
-
 type Transaction = {
   id: string;
   amount: number;
@@ -21,7 +20,6 @@ type Transaction = {
   date: string;
   category: Category | null;
 };
-
 type Budget = {
   id: string;
   amount: number;
@@ -30,7 +28,6 @@ type Budget = {
   endDate: string;
   category: Category | null;
 };
-
 type Summary = {
   totalTransactions: number;
   totalIncome: number;
@@ -39,7 +36,6 @@ type Summary = {
   totalCategories: number;
   totalBudgets: number;
 };
-
 type Tab = "summary" | "transactions" | "categories" | "budgets";
 
 const fmt = (amount: number) =>
@@ -87,9 +83,18 @@ export default function DataPage() {
     { key: "budgets", label: "Budgets", count: budgets.length },
   ];
 
+  const thStyle = {
+    color: "var(--text-muted)",
+    backgroundColor: "var(--bg)",
+    borderBottom: "1px solid var(--border)",
+  };
+
+  const tdMuted = { color: "var(--text-muted)" };
+  const tdText = { color: "var(--text)" };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar title="My Data" backHref="/" />
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg)" }}>
+      <Navbar title="Summary" backHref="/" />
 
       <div className="max-w-4xl mx-auto p-6 space-y-4">
         {loading ? (
@@ -99,25 +104,39 @@ export default function DataPage() {
         ) : (
           <>
             {/* Tabs */}
-            <div className="flex gap-1 bg-white rounded-xl p-1 shadow-sm">
+            <div
+              className="flex gap-1 rounded-xl p-1 shadow-sm"
+              style={{
+                backgroundColor: "var(--bg-card)",
+                border: "1px solid var(--border)",
+              }}
+            >
               {tabs.map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition flex items-center justify-center gap-1.5 ${
+                  className="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition flex items-center justify-center gap-1.5 cursor-pointer"
+                  style={
                     activeTab === tab.key
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-600 hover:bg-gray-50"
-                  }`}
+                      ? { backgroundColor: "#2563eb", color: "white" }
+                      : {
+                          color: "var(--text-muted)",
+                          backgroundColor: "transparent",
+                        }
+                  }
                 >
                   {tab.label}
                   {tab.count !== undefined && (
                     <span
-                      className={`text-xs px-1.5 py-0.5 rounded-full ${
+                      className="text-xs px-1.5 py-0.5 rounded-full"
+                      style={
                         activeTab === tab.key
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-100 text-gray-500"
-                      }`}
+                          ? { backgroundColor: "#1d4ed8", color: "white" }
+                          : {
+                              backgroundColor: "var(--bg)",
+                              color: "var(--text-muted)",
+                            }
+                      }
                     >
                       {tab.count}
                     </span>
@@ -128,53 +147,58 @@ export default function DataPage() {
 
             {/* Summary Tab */}
             {activeTab === "summary" && summary && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white rounded-2xl p-5 shadow-sm">
-                    <p className="text-xs text-gray-400 mb-1">Total Balance</p>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  {
+                    label: "Total Balance",
+                    value: fmt(summary.balance),
+                    color: summary.balance >= 0 ? "#10b981" : "#ef4444",
+                  },
+                  {
+                    label: "Total Transactions",
+                    value: summary.totalTransactions,
+                    color: "var(--text)",
+                  },
+                  {
+                    label: "All-time Income",
+                    value: fmt(summary.totalIncome),
+                    color: "#10b981",
+                  },
+                  {
+                    label: "All-time Expenses",
+                    value: fmt(summary.totalExpense),
+                    color: "#ef4444",
+                  },
+                  {
+                    label: "Categories",
+                    value: summary.totalCategories,
+                    color: "var(--text)",
+                  },
+                  {
+                    label: "Budgets",
+                    value: summary.totalBudgets,
+                    color: "var(--text)",
+                  },
+                ].map((card) => (
+                  <div
+                    key={card.label}
+                    className="rounded-2xl p-5 shadow-sm"
+                    style={{
+                      backgroundColor: "var(--bg-card)",
+                      border: "1px solid var(--border)",
+                    }}
+                  >
+                    <p className="text-xs mb-1" style={tdMuted}>
+                      {card.label}
+                    </p>
                     <p
-                      className={`text-2xl font-bold ${summary.balance >= 0 ? "text-green-600" : "text-red-500"}`}
+                      className="text-2xl font-bold"
+                      style={{ color: card.color }}
                     >
-                      {fmt(summary.balance)}
+                      {card.value}
                     </p>
                   </div>
-                  <div className="bg-white rounded-2xl p-5 shadow-sm">
-                    <p className="text-xs text-gray-400 mb-1">
-                      Total Transactions
-                    </p>
-                    <p className="text-2xl font-bold text-gray-800">
-                      {summary.totalTransactions}
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-2xl p-5 shadow-sm">
-                    <p className="text-xs text-gray-400 mb-1">
-                      All-time Income
-                    </p>
-                    <p className="text-2xl font-bold text-green-600">
-                      {fmt(summary.totalIncome)}
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-2xl p-5 shadow-sm">
-                    <p className="text-xs text-gray-400 mb-1">
-                      All-time Expenses
-                    </p>
-                    <p className="text-2xl font-bold text-red-500">
-                      {fmt(summary.totalExpense)}
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-2xl p-5 shadow-sm">
-                    <p className="text-xs text-gray-400 mb-1">Categories</p>
-                    <p className="text-2xl font-bold text-gray-800">
-                      {summary.totalCategories}
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-2xl p-5 shadow-sm">
-                    <p className="text-xs text-gray-400 mb-1">Budgets</p>
-                    <p className="text-2xl font-bold text-gray-800">
-                      {summary.totalBudgets}
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
             )}
 
@@ -186,63 +210,100 @@ export default function DataPage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search by category, note, amount..."
-                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                  style={{
+                    backgroundColor: "var(--bg-card)",
+                    color: "var(--text)",
+                    border: "1px solid var(--border)",
+                  }}
                 />
-                <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <div
+                  className="rounded-2xl shadow-sm overflow-hidden"
+                  style={{
+                    backgroundColor: "var(--bg-card)",
+                    border: "1px solid var(--border)",
+                  }}
+                >
                   <table className="w-full text-sm">
-                    <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+                    <thead>
                       <tr>
-                        <th className="px-4 py-3 text-left">Date</th>
-                        <th className="px-4 py-3 text-left">Category</th>
-                        <th className="px-4 py-3 text-left">Note</th>
-                        <th className="px-4 py-3 text-left">Type</th>
-                        <th className="px-4 py-3 text-right">Amount</th>
+                        {["Date", "Category", "Note", "Type", "Amount"].map(
+                          (h) => (
+                            <th
+                              key={h}
+                              className={`px-4 py-3 text-xs font-semibold uppercase tracking-wide ${h === "Amount" ? "text-right" : "text-left"}`}
+                              style={thStyle}
+                            >
+                              {h}
+                            </th>
+                          ),
+                        )}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody>
                       {filteredTransactions.length === 0 ? (
                         <tr>
                           <td
                             colSpan={5}
-                            className="px-4 py-8 text-center text-gray-400"
+                            className="px-4 py-8 text-center"
+                            style={tdMuted}
                           >
                             No transactions found
                           </td>
                         </tr>
                       ) : (
-                        filteredTransactions.map((t) => (
-                          <tr key={t.id} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                        filteredTransactions.map((t, i) => (
+                          <tr
+                            key={t.id}
+                            style={{
+                              borderTop:
+                                i > 0 ? "1px solid var(--border)" : "none",
+                            }}
+                          >
+                            <td
+                              className="px-4 py-3 whitespace-nowrap"
+                              style={tdMuted}
+                            >
                               {new Date(t.date).toLocaleDateString("id-ID")}
                             </td>
                             <td className="px-4 py-3">
                               <span className="flex items-center gap-1.5">
-                                {getIcon(t.category?.icon ?? null)}
-                                <span className="text-gray-700">
+                                <span>{getIcon(t.category?.icon ?? null)}</span>
+                                <span style={tdText}>
                                   {t.category?.name ?? "Uncategorized"}
                                 </span>
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-gray-400 max-w-[150px] truncate">
+                            <td
+                              className="px-4 py-3 max-w-[150px] truncate"
+                              style={tdMuted}
+                            >
                               {t.note ?? "-"}
                             </td>
                             <td className="px-4 py-3">
                               <span
-                                className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                className="px-2 py-0.5 rounded-full text-xs font-medium"
+                                style={
                                   t.type === "INCOME"
-                                    ? "bg-green-100 text-green-700"
-                                    : "bg-red-100 text-red-700"
-                                }`}
+                                    ? {
+                                        backgroundColor: "#dcfce7",
+                                        color: "#15803d",
+                                      }
+                                    : {
+                                        backgroundColor: "#fee2e2",
+                                        color: "#b91c1c",
+                                      }
+                                }
                               >
                                 {t.type}
                               </span>
                             </td>
                             <td
-                              className={`px-4 py-3 text-right font-semibold ${
-                                t.type === "INCOME"
-                                  ? "text-green-600"
-                                  : "text-red-500"
-                              }`}
+                              className="px-4 py-3 text-right font-semibold"
+                              style={{
+                                color:
+                                  t.type === "INCOME" ? "#10b981" : "#ef4444",
+                              }}
                             >
                               {t.type === "INCOME" ? "+" : "-"}
                               {fmt(t.amount)}
@@ -258,29 +319,47 @@ export default function DataPage() {
 
             {/* Categories Tab */}
             {activeTab === "categories" && (
-              <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              <div
+                className="rounded-2xl shadow-sm overflow-hidden"
+                style={{
+                  backgroundColor: "var(--bg-card)",
+                  border: "1px solid var(--border)",
+                }}
+              >
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+                  <thead>
                     <tr>
-                      <th className="px-4 py-3 text-left">Icon</th>
-                      <th className="px-4 py-3 text-left">Name</th>
-                      <th className="px-4 py-3 text-left">Color</th>
-                      <th className="px-4 py-3 text-right">Actions</th>
+                      {["Icon", "Name", "Color", "Actions"].map((h) => (
+                        <th
+                          key={h}
+                          className={`px-4 py-3 text-xs font-semibold uppercase tracking-wide ${h === "Actions" ? "text-right" : "text-left"}`}
+                          style={thStyle}
+                        >
+                          {h}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody>
                     {categories.length === 0 ? (
                       <tr>
                         <td
                           colSpan={4}
-                          className="px-4 py-8 text-center text-gray-400"
+                          className="px-4 py-8 text-center"
+                          style={tdMuted}
                         >
                           No categories yet
                         </td>
                       </tr>
                     ) : (
-                      categories.map((cat) => (
-                        <tr key={cat.id} className="hover:bg-gray-50">
+                      categories.map((cat, i) => (
+                        <tr
+                          key={cat.id}
+                          style={{
+                            borderTop:
+                              i > 0 ? "1px solid var(--border)" : "none",
+                          }}
+                        >
                           <td className="px-4 py-3">
                             <span
                               className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"
@@ -292,7 +371,7 @@ export default function DataPage() {
                               {getIcon(cat.icon ?? null)}
                             </span>
                           </td>
-                          <td className="px-4 py-3 font-medium text-gray-700">
+                          <td className="px-4 py-3 font-medium" style={tdText}>
                             {cat.name}
                           </td>
                           <td className="px-4 py-3">
@@ -303,7 +382,7 @@ export default function DataPage() {
                                   backgroundColor: cat.color ?? "#6366f1",
                                 }}
                               />
-                              <span className="text-gray-400 text-xs">
+                              <span className="text-xs" style={tdMuted}>
                                 {cat.color ?? "-"}
                               </span>
                             </span>
@@ -311,7 +390,7 @@ export default function DataPage() {
                           <td className="px-4 py-3 text-right">
                             <Link
                               href="/categories"
-                              className="text-xs text-blue-600 hover:underline"
+                              className="text-xs text-blue-500 hover:underline"
                             >
                               Edit
                             </Link>
@@ -326,50 +405,77 @@ export default function DataPage() {
 
             {/* Budgets Tab */}
             {activeTab === "budgets" && (
-              <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              <div
+                className="rounded-2xl shadow-sm overflow-hidden"
+                style={{
+                  backgroundColor: "var(--bg-card)",
+                  border: "1px solid var(--border)",
+                }}
+              >
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+                  <thead>
                     <tr>
-                      <th className="px-4 py-3 text-left">Category</th>
-                      <th className="px-4 py-3 text-left">Period</th>
-                      <th className="px-4 py-3 text-left">Date Range</th>
-                      <th className="px-4 py-3 text-right">Amount</th>
+                      {["Category", "Period", "Date Range", "Amount"].map(
+                        (h) => (
+                          <th
+                            key={h}
+                            className={`px-4 py-3 text-xs font-semibold uppercase tracking-wide ${h === "Amount" ? "text-right" : "text-left"}`}
+                            style={thStyle}
+                          >
+                            {h}
+                          </th>
+                        ),
+                      )}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody>
                     {budgets.length === 0 ? (
                       <tr>
                         <td
                           colSpan={4}
-                          className="px-4 py-8 text-center text-gray-400"
+                          className="px-4 py-8 text-center"
+                          style={tdMuted}
                         >
                           No budgets yet
                         </td>
                       </tr>
                     ) : (
-                      budgets.map((b) => (
-                        <tr key={b.id} className="hover:bg-gray-50">
+                      budgets.map((b, i) => (
+                        <tr
+                          key={b.id}
+                          style={{
+                            borderTop:
+                              i > 0 ? "1px solid var(--border)" : "none",
+                          }}
+                        >
                           <td className="px-4 py-3">
                             <span className="flex items-center gap-1.5">
-                              <span>
-                                {getIcon(b.category?.icon ?? "general")}
-                              </span>
-                              <span className="text-gray-700">
+                              <span>{getIcon(b.category?.icon ?? null)}</span>
+                              <span style={tdText}>
                                 {b.category?.name ?? "General"}
                               </span>
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                            <span
+                              className="px-2 py-0.5 rounded-full text-xs font-medium"
+                              style={{
+                                backgroundColor: "#dbeafe",
+                                color: "#1d4ed8",
+                              }}
+                            >
                               {b.period.charAt(0) +
                                 b.period.slice(1).toLowerCase()}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-gray-400 text-xs">
+                          <td className="px-4 py-3 text-xs" style={tdMuted}>
                             {new Date(b.startDate).toLocaleDateString("id-ID")}{" "}
                             – {new Date(b.endDate).toLocaleDateString("id-ID")}
                           </td>
-                          <td className="px-4 py-3 text-right font-semibold text-gray-800">
+                          <td
+                            className="px-4 py-3 text-right font-semibold"
+                            style={tdText}
+                          >
                             {fmt(b.amount)}
                           </td>
                         </tr>
