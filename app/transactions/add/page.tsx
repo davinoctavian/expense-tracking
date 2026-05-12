@@ -79,7 +79,7 @@ export default function AddTransactionPage() {
       <FullscreenOverlay show={loading} />
       <Navbar title="Add Transaction" backHref="/" />
 
-      <div className="max-w-lg mx-auto p-6">
+      <div className="max-w-lg mx-auto p-4 md:p-6 pb-8">
         <FormCard>
           <ErrorMessage message={error} />
 

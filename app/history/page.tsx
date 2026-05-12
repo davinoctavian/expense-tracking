@@ -85,16 +85,16 @@ export default function HistoryPage() {
         }
       />
 
-      <div className="max-w-2xl mx-auto p-6 space-y-4">
+      <div className="max-w-2xl mx-auto p-4 md:p-6 space-y-4">
         <PeriodSelector value={period} onChange={setPeriod} />
 
-        {/* Filter Buttons */}
+        {/* Filter */}
         <div className="flex gap-2">
           {(["ALL", "INCOME", "EXPENSE"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className="px-3 py-1 rounded-full text-xs font-medium transition cursor-pointer"
+              className="px-4 py-1.5 rounded-full text-xs font-medium transition cursor-pointer"
               style={{
                 backgroundColor:
                   filter === f
@@ -126,14 +126,18 @@ export default function HistoryPage() {
         ) : (
           Object.entries(grouped).map(([date, items]) => (
             <div key={date}>
-              <div className="flex items-center justify-between mb-2">
+              {/* Date header */}
+              <div className="flex items-center justify-between mb-2 px-1">
                 <p
                   className="text-xs font-semibold uppercase tracking-wide"
                   style={{ color: "var(--text-muted)" }}
                 >
                   {date}
                 </p>
-                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                <p
+                  className="text-xs font-medium"
+                  style={{ color: "var(--text-muted)" }}
+                >
                   {items.reduce(
                     (sum, t) =>
                       t.type === "INCOME" ? sum + t.amount : sum - t.amount,
@@ -161,17 +165,26 @@ export default function HistoryPage() {
                 {items.map((t, i) => (
                   <div
                     key={t.id}
-                    className="flex items-center gap-3 px-4 py-3"
+                    className="flex items-center gap-3 px-4 py-3 active:opacity-70"
                     style={{
                       borderTop: i > 0 ? "1px solid var(--border)" : "none",
                     }}
                   >
-                    <span className="text-xl">
+                    {/* Icon */}
+                    <span
+                      className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                      style={{
+                        backgroundColor:
+                          (t.category?.color ?? "#6366f1") + "22",
+                      }}
+                    >
                       {getIcon(t.category?.icon ?? null)}
                     </span>
+
+                    {/* Info */}
                     <div className="flex-1 min-w-0">
                       <p
-                        className="text-sm font-medium"
+                        className="text-sm font-medium truncate"
                         style={{ color: "var(--text)" }}
                       >
                         {t.category?.name ?? "Uncategorized"}
@@ -185,18 +198,22 @@ export default function HistoryPage() {
                         </p>
                       )}
                     </div>
+
+                    {/* Amount */}
                     <p
-                      className={`text-sm font-semibold ${t.type === "INCOME" ? "text-green-500" : "text-red-500"}`}
+                      className={`text-sm font-semibold flex-shrink-0 ${t.type === "INCOME" ? "text-green-500" : "text-red-500"}`}
                     >
                       {t.type === "INCOME" ? "+" : "-"}
                       {fmt(t.amount)}
                     </p>
-                    <div className="flex gap-1">
+
+                    {/* Actions */}
+                    <div className="flex gap-1 flex-shrink-0">
                       <button
                         onClick={() =>
                           router.push(`/transactions/${t.id}/edit`)
                         }
-                        className="p-1.5 rounded-lg transition cursor-pointer"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg transition cursor-pointer"
                         style={{ color: "var(--text-muted)" }}
                       >
                         ✏️
@@ -204,7 +221,7 @@ export default function HistoryPage() {
                       <button
                         onClick={() => handleDelete(t.id)}
                         disabled={deleteId === t.id}
-                        className="p-1.5 rounded-lg transition cursor-pointer disabled:opacity-50"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg transition cursor-pointer disabled:opacity-50"
                         style={{ color: "var(--text-muted)" }}
                       >
                         🗑️

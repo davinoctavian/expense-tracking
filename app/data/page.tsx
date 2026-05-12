@@ -96,7 +96,7 @@ export default function DataPage() {
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg)" }}>
       <Navbar title="Summary" backHref="/" />
 
-      <div className="max-w-4xl mx-auto p-6 space-y-4">
+      <div className="max-w-4xl mx-auto p-4 md:p-6 pb-8 space-y-4">
         {loading ? (
           <div className="flex justify-center py-20">
             <LoadingSpinner size="lg" />

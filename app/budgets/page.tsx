@@ -152,11 +152,14 @@ export default function BudgetsPage() {
 
   const getSpent = (budget: Budget) =>
     transactions
-      .filter(
-        (t) =>
-          t.type === "EXPENSE" &&
-          (budget.category ? t.categoryId === budget.category.id : true),
-      )
+      .filter((t) => {
+        if (t.type !== "EXPENSE") return false;
+        if (budget.category) {
+          return t.categoryId === budget.category.id;
+        } else {
+          return t.categoryId === null || t.categoryId === "";
+        }
+      })
       .reduce((sum, t) => sum + t.amount, 0);
 
   const inputStyle = {
@@ -186,7 +189,7 @@ export default function BudgetsPage() {
         }
       />
 
-      <div className="max-w-2xl mx-auto p-6 space-y-4">
+      <div className="max-w-2xl mx-auto p-4 md:p-6 pb-8 space-y-4">
         {showForm && (
           <FormCard title={editingId ? "Edit Budget" : "New Budget"}>
             <ErrorMessage message={error} />

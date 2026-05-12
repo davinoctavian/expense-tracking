@@ -5,10 +5,7 @@ import { useSession } from "next-auth/react";
 import LogoutButton from "./LogoutButton";
 import ThemeToggle from "./ThemeToggle";
 
-type NavLink = {
-  href: string;
-  label: string;
-};
+type NavLink = { href: string; label: string };
 
 type Props = {
   title?: string;
@@ -29,17 +26,18 @@ export default function Navbar({
 
   return (
     <nav
-      className="shadow-sm px-6 py-4 flex items-center gap-4"
+      className="sticky top-0 z-30 px-4 py-3 flex items-center gap-3"
       style={{
         backgroundColor: "var(--nav-bg)",
         borderBottom: "1px solid var(--border)",
+        backdropFilter: "blur(8px)",
       }}
     >
       {backHref && (
         <Link
           href={backHref}
-          className="transition"
-          style={{ color: "var(--text-muted)" }}
+          className="w-8 h-8 flex items-center justify-center rounded-lg transition"
+          style={{ color: "var(--text-muted)", backgroundColor: "var(--bg)" }}
           onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text)")}
           onMouseLeave={(e) =>
             (e.currentTarget.style.color = "var(--text-muted)")
@@ -48,73 +46,60 @@ export default function Navbar({
           ←
         </Link>
       )}
-      <h1 className="text-lg font-bold" style={{ color: "var(--text)" }}>
+
+      <h1
+        className="text-base font-bold flex-1 truncate"
+        style={{ color: "var(--text)" }}
+      >
         {title}
       </h1>
 
+      {/* Desktop only user links */}
       {showUserLinks && (
-        <>
-          <span className="text-sm ml-2" style={{ color: "var(--text-muted)" }}>
+        <div className="hidden md:flex items-center gap-4">
+          <span className="text-sm" style={{ color: "var(--text-muted)" }}>
             Hi, {session?.user?.name}
           </span>
-          <div className="ml-auto flex items-center gap-4">
-            <Link
-              href="/transactions/add"
-              className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700"
-            >
-              + Add
-            </Link>
-            <Link
-              href="/history"
-              className="text-sm hover:underline"
-              style={{ color: "var(--text)" }}
-            >
-              History
-            </Link>
-            <Link
-              href="/budgets"
-              className="text-sm hover:underline"
-              style={{ color: "var(--text)" }}
-            >
-              Budgets
-            </Link>
-            <Link
-              href="/categories"
-              className="text-sm hover:underline"
-              style={{ color: "var(--text)" }}
-            >
-              Categories
-            </Link>
-            <Link
-              href="/data"
-              className="text-sm hover:underline"
-              style={{ color: "var(--text)" }}
-            >
-              Data
-            </Link>
-            <ThemeToggle />
-            <LogoutButton />
-          </div>
-        </>
-      )}
-
-      {links && !showUserLinks && (
-        <div className="ml-auto flex items-center gap-4">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="text-sm text-gray-600 hover:underline"
-            >
-              {l.label}
-            </Link>
-          ))}
+          <Link
+            href="/data"
+            className="text-sm hover:underline"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Data
+          </Link>
+          <Link
+            href="/history"
+            className="text-sm hover:underline"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Transaction
+          </Link>
+          <Link
+            href="/budgets"
+            className="text-sm hover:underline"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Budgets
+          </Link>
+          <Link
+            href="/categories"
+            className="text-sm hover:underline"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Categories
+          </Link>
         </div>
       )}
 
-      {actions && (
-        <div className="ml-auto flex items-center gap-2">{actions}</div>
-      )}
+      <div className="flex items-center gap-2">
+        <ThemeToggle />
+        {showUserLinks && (
+          <div className="hidden md:block">
+            <LogoutButton />
+          </div>
+        )}
+        {actions}
+      </div>
     </nav>
   );
 }
