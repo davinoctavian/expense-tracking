@@ -93,8 +93,8 @@ export default function Navbar({
 
       <div className="flex items-center gap-2">
         <ThemeToggle />
-        {showUserLinks && (
-          <div className="hidden md:block">
+        {!actions && (
+          <div className="md:block">
             <LogoutButton />
           </div>
         )}

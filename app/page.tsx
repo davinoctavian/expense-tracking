@@ -14,7 +14,7 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import Navbar from "@/components/Navbar";
 import PeriodSelector from "@/components/PeriodSelector";
 import { getIcon } from "@/lib/icons";
-import { useTheme } from "@/lib/ThemeContext";
+import { useSession } from "next-auth/react";
 
 type Transaction = {
   id: string;
@@ -44,10 +44,10 @@ const fmt = (amount: number) =>
   }).format(amount);
 
 export default function DashboardPage() {
-  const { theme } = useTheme();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [period, setPeriod] = useState<Period>("MONTHLY");
   const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
 
   useEffect(() => {
     fetchTransactions();
@@ -295,6 +295,11 @@ export default function DashboardPage() {
               backgroundColor: "var(--bg-card)",
               border: "1px solid var(--border)",
               color: "var(--text)",
+              visibility:
+                session?.user.username !==
+                process.env.NEXT_PUBLIC_SUPER_ADMIN_USERNAME
+                  ? "hidden"
+                  : "visible",
             }}
           >
             <span className="text-2xl">⚙️</span>
