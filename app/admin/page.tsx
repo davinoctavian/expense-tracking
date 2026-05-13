@@ -86,7 +86,7 @@ export default function AdminPage() {
 
         {/* Table */}
         <div
-          className="rounded-2xl shadow-sm overflow-hidden"
+          className="rounded-2xl shadow-sm overflow-auto"
           style={{
             backgroundColor: "var(--bg-card)",
             border: "1px solid var(--border)",

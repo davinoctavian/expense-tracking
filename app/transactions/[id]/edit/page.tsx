@@ -24,16 +24,21 @@ export default function EditTransactionPage() {
     date: "",
     categoryId: "",
   });
+  const [hasGeneralBudget, setHasGeneralBudget] = useState(false);
+  const [availableCategories, setAvailableCategories] = useState<Category[]>(
+    [],
+  );
 
   useEffect(() => {
     fetch("/api/categories")
       .then((r) => r.json())
       .then(setCategories);
+
     fetch(`/api/transactions?period=YEARLY`)
       .then((r) => r.json())
       .then((data) => {
         const t = data.find((t: { id: string }) => t.id === id);
-        if (t)
+        if (t) {
           setForm({
             amount: t.amount.toString(),
             type: t.type,
@@ -41,8 +46,23 @@ export default function EditTransactionPage() {
             date: new Date(t.date).toISOString().split("T")[0],
             categoryId: t.categoryId ?? "",
           });
+          // Fetch available categories for this date
+          if (t.type === "EXPENSE")
+            fetchAvailableCategories(
+              new Date(t.date).toISOString().split("T")[0],
+            );
+        }
       });
   }, [id]);
+
+  const fetchAvailableCategories = async (date: string) => {
+    const res = await fetch(`/api/categories/available?date=${date}`);
+    if (res.ok) {
+      const data = await res.json();
+      setAvailableCategories(data.categories);
+      setHasGeneralBudget(data.hasGeneralBudget);
+    }
+  };
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();

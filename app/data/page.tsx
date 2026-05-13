@@ -105,7 +105,7 @@ export default function DataPage() {
           <>
             {/* Tabs */}
             <div
-              className="flex gap-1 rounded-xl p-1 shadow-sm"
+              className="flex gap-1 rounded-xl p-1 shadow-sm overflow-x-auto"
               style={{
                 backgroundColor: "var(--bg-card)",
                 border: "1px solid var(--border)",
@@ -218,7 +218,7 @@ export default function DataPage() {
                   }}
                 />
                 <div
-                  className="rounded-2xl shadow-sm overflow-hidden"
+                  className="rounded-2xl shadow-sm overflow-x-auto"
                   style={{
                     backgroundColor: "var(--bg-card)",
                     border: "1px solid var(--border)",
@@ -320,7 +320,7 @@ export default function DataPage() {
             {/* Categories Tab */}
             {activeTab === "categories" && (
               <div
-                className="rounded-2xl shadow-sm overflow-hidden"
+                className="rounded-2xl shadow-sm overflow-x-auto"
                 style={{
                   backgroundColor: "var(--bg-card)",
                   border: "1px solid var(--border)",
@@ -406,7 +406,7 @@ export default function DataPage() {
             {/* Budgets Tab */}
             {activeTab === "budgets" && (
               <div
-                className="rounded-2xl shadow-sm overflow-hidden"
+                className="rounded-2xl shadow-sm overflow-x-auto"
                 style={{
                   backgroundColor: "var(--bg-card)",
                   border: "1px solid var(--border)",
