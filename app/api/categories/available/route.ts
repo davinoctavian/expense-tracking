@@ -2,6 +2,12 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+type BudgetWithCategory = {
+  id: string;
+  categoryId: string | null;
+  category: { id: string; name: string } | null;
+};
+
 export async function GET(req: Request) {
   try {
     const session = await auth();
@@ -17,14 +23,14 @@ export async function GET(req: Request) {
     const transactionDate = new Date(date);
 
     // Find budgets that cover this date
-    const budgets = await prisma.budget.findMany({
+    const budgets = (await prisma.budget.findMany({
       where: {
         userId: session.user.id,
         startDate: { lte: transactionDate },
         endDate: { gte: transactionDate },
       },
       include: { category: true },
-    });
+    })) as BudgetWithCategory[];
 
     // Get category IDs that have budgets
     const budgetCategoryIds = budgets
