@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const navItems = [
   { href: "/", icon: "📊", label: "Dashboard" },
@@ -13,6 +14,12 @@ const navItems = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { data: session, status } = useSession();
+
+  // Don't show on auth pages or when not logged in
+  if (status === "loading") return null;
+  if (!session) return null;
+  if (pathname === "/login" || pathname === "/register") return null;
 
   return (
     <nav

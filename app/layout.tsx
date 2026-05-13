@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "@/lib/ThemeContext";
 import BottomNav from "@/components/BottomNav";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import PageContainer from "@/components/PageContainer";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -36,12 +37,12 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Expenses" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased pb-20 md:pb-0`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SessionProvider>
           <ThemeProvider>
             <ServiceWorkerRegister />
-            {children}
+            <PageContainer>{children}</PageContainer>
             <BottomNav />
           </ThemeProvider>
         </SessionProvider>
