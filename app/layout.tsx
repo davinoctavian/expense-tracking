@@ -4,6 +4,7 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "@/lib/ThemeContext";
 import BottomNav from "@/components/BottomNav";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -29,12 +30,17 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/api/manifest" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Expenses" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased pb-20 md:pb-0`}
       >
         <SessionProvider>
           <ThemeProvider>
+            <ServiceWorkerRegister />
             {children}
             <BottomNav />
           </ThemeProvider>

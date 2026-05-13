@@ -6,10 +6,11 @@ export async function GET() {
     short_name: "Expenses",
     description: "Track your daily expenses",
     start_url: "/",
+    scope: "/",
     display: "standalone",
-    background_color: "#f9fafb",
-    theme_color: "#2563eb",
     orientation: "portrait",
+    background_color: "#0f172a",
+    theme_color: "#2563eb",
     icons: [
       {
         src: "/icons/icon-192x192.png",
@@ -18,10 +19,22 @@ export async function GET() {
         purpose: "any",
       },
       {
+        src: "/icons/icon-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "maskable",
+      },
+      {
         src: "/icons/icon-512x512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
+      },
+      {
+        src: "/icons/icon-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
       },
     ],
   };
@@ -29,7 +42,7 @@ export async function GET() {
   return new Response(JSON.stringify(manifest), {
     headers: {
       "Content-Type": "application/manifest+json; charset=utf-8",
-      "Cache-Control": "no-cache",
+      "Cache-Control": "public, max-age=0, must-revalidate",
     },
   });
 }
