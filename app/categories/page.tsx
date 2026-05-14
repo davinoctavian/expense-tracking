@@ -8,6 +8,8 @@ import EmptyState from "@/components/EmptyState";
 import FormCard from "@/components/FormCard";
 import ErrorMessage from "@/components/ErrorMessage";
 import { getIcon, ICON_MAP } from "@/lib/icons";
+import IconPicker from "@/components/IconPicker";
+import ColorPicker from "@/components/ColorPicker";
 
 type Category = {
   id: string;
@@ -15,19 +17,6 @@ type Category = {
   icon: string | null;
   color: string | null;
 };
-
-const COLOR_OPTIONS = [
-  "#6366f1",
-  "#f59e0b",
-  "#10b981",
-  "#ef4444",
-  "#3b82f6",
-  "#8b5cf6",
-  "#ec4899",
-  "#14b8a6",
-  "#f97316",
-  "#84cc16",
-];
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -161,26 +150,10 @@ export default function CategoriesPage() {
                 >
                   Icon
                 </label>
-                <div className="flex flex-wrap gap-2">
-                  {Object.entries(ICON_MAP).map(([key, emoji]) => (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => setForm({ ...form, icon: key })}
-                      className="w-10 h-10 rounded-xl text-xl flex items-center justify-center transition cursor-pointer"
-                      style={{
-                        border:
-                          form.icon === key
-                            ? "2px solid #3b82f6"
-                            : "2px solid var(--border)",
-                        backgroundColor:
-                          form.icon === key ? "#eff6ff" : "var(--bg-card)",
-                      }}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
+                <IconPicker
+                  value={form.icon}
+                  onChange={(key) => setForm({ ...form, icon: key })}
+                />
               </div>
 
               <div>
@@ -190,25 +163,10 @@ export default function CategoriesPage() {
                 >
                   Color
                 </label>
-                <div className="flex gap-2">
-                  {COLOR_OPTIONS.map((color) => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => setForm({ ...form, color })}
-                      className="w-8 h-8 rounded-full transition cursor-pointer"
-                      style={{
-                        backgroundColor: color,
-                        border:
-                          form.color === color
-                            ? "3px solid var(--text)"
-                            : "3px solid transparent",
-                        transform:
-                          form.color === color ? "scale(1.1)" : "scale(1)",
-                      }}
-                    />
-                  ))}
-                </div>
+                <ColorPicker
+                  value={form.color}
+                  onChange={(color) => setForm({ ...form, color })}
+                />
               </div>
 
               {/* Preview */}

@@ -36,14 +36,33 @@ export default function Navbar({
       {backHref && (
         <Link
           href={backHref}
-          className="w-8 h-8 flex items-center justify-center rounded-lg transition"
-          style={{ color: "var(--text-muted)", backgroundColor: "var(--bg)" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text)")}
+          className="flex items-center justify-center w-9 h-9 rounded-xl transition active:scale-95"
+          style={{
+            backgroundColor: "var(--bg)",
+            border: "1px solid var(--border)",
+            color: "var(--text)",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = "var(--border)")
+          }
           onMouseLeave={(e) =>
-            (e.currentTarget.style.color = "var(--text-muted)")
+            (e.currentTarget.style.backgroundColor = "var(--bg)")
           }
         >
-          ←
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
         </Link>
       )}
 
@@ -92,6 +111,12 @@ export default function Navbar({
       )}
 
       <div className="flex items-center gap-2">
+        <Link
+          href="/profile"
+          className="flex items-center justify-center w-9 h-9 rounded-xl transition active:scale-95"
+        >
+          👤
+        </Link>
         <ThemeToggle />
         {!actions && (
           <div className="md:block">

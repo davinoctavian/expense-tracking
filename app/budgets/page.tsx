@@ -9,6 +9,7 @@ import FormCard from "@/components/FormCard";
 import ErrorMessage from "@/components/ErrorMessage";
 import { getIcon } from "@/lib/icons";
 import IncomeAllocationInfo from "@/components/IncomeAllocationInfo";
+import CurrencyInput from "@/components/CurrencyInput";
 
 type Category = {
   id: string;
@@ -283,26 +284,12 @@ export default function BudgetsPage() {
                 >
                   Budget Amount
                 </label>
-                <div className="relative">
-                  <span
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-sm"
-                    style={mutedStyle}
-                  >
-                    Rp
-                  </span>
-                  <input
-                    type="number"
-                    value={form.amount}
-                    onChange={(e) =>
-                      setForm({ ...form, amount: e.target.value })
-                    }
-                    className="w-full rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    style={inputStyle}
-                    placeholder="0"
-                    min="0"
-                    required
-                  />
-                </div>
+                <CurrencyInput
+                  value={form.amount}
+                  onChange={(raw) => setForm({ ...form, amount: raw })}
+                  style={inputStyle}
+                  required
+                />
               </div>
 
               {/* Dates */}
@@ -321,7 +308,7 @@ export default function BudgetsPage() {
                       onChange={(e) =>
                         setForm({ ...form, [field]: e.target.value })
                       }
-                      className="w-full rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full box-border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       style={inputStyle}
                       required
                     />

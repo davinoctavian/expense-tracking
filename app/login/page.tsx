@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
@@ -45,7 +46,7 @@ export default function LoginPage() {
       style={{ backgroundColor: "var(--bg)" }}
     >
       <div
-        className="m-4 p-8 rounded-2xl shadow-md w-full max-w-md"
+        className="p-8 rounded-2xl shadow-md w-full max-w-md"
         style={{ backgroundColor: "var(--bg-card)" }}
       >
         <h1
@@ -73,7 +74,7 @@ export default function LoginPage() {
               type="text"
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
-              className="w-full rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               style={inputStyle}
               placeholder="johndoe"
               required
@@ -87,15 +88,25 @@ export default function LoginPage() {
             >
               Password
             </label>
-            <input
-              type="password"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              style={inputStyle}
-              placeholder="••••••••"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                className="w-full rounded-lg px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={inputStyle}
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-lg cursor-pointer"
+                style={{ color: "var(--text-muted)" }}
+              >
+                {showPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
           </div>
 
           <ButtonLoader
