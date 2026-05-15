@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import LogoutButton from "@/components/LogoutButton";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import SpyModal from "@/components/SpyModal";
 
 type User = {
   id: string;
@@ -22,6 +23,9 @@ export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [spyUser, setSpyUser] = useState<{ id: string; name: string } | null>(
+    null,
+  );
 
   const fetchUsers = async () => {
     const res = await fetch("/api/admin/users");
@@ -62,8 +66,16 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen p-6" style={{ backgroundColor: "var(--bg)" }}>
+      {/* Spy Modal */}
+      {spyUser && (
+        <SpyModal
+          userId={spyUser.id}
+          userName={spyUser.name}
+          onClose={() => setSpyUser(null)}
+        />
+      )}
+
       <div className="max-w-5xl mx-auto">
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold" style={{ color: "var(--text)" }}>
@@ -84,7 +96,6 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Table */}
         <div
           className="rounded-2xl shadow-sm overflow-auto"
           style={{
@@ -180,6 +191,25 @@ export default function AdminPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2 justify-center">
+                        {/* Spy Button */}
+                        <button
+                          onClick={() =>
+                            setSpyUser({ id: user.id, name: user.name })
+                          }
+                          className="px-3 py-1 text-xs rounded-lg transition cursor-pointer"
+                          style={{
+                            backgroundColor: "#e0e7ff",
+                            color: "#4338ca",
+                          }}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.backgroundColor = "#c7d2fe")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.backgroundColor = "#e0e7ff")
+                          }
+                        >
+                          🔍 Spy
+                        </button>
                         <button
                           onClick={() => handleDeleteData(user.id, user.name)}
                           disabled={actionLoading === user.id + "-data"}
