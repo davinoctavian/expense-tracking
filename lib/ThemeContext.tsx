@@ -21,22 +21,34 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // 1. Apply cached theme instantly from localStorage
+    const cached = localStorage.getItem("theme") as Theme | null;
+    if (cached) {
+      setTheme(cached);
+      document.documentElement.setAttribute("data-theme", cached);
+    }
+
+    // 2. Then fetch from DB to sync
     fetch("/api/user/theme")
       .then((r) => r.json())
       .then((data) => {
         if (data.theme) {
           setTheme(data.theme);
           document.documentElement.setAttribute("data-theme", data.theme);
+          localStorage.setItem("theme", data.theme);
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setLoading(false);
+      });
   }, []);
 
   const toggleTheme = async () => {
-    const next = theme === "light" ? "dark" : "light";
+    const next: Theme = theme === "light" ? "dark" : "light";
     setTheme(next);
     document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("theme", next);
 
     await fetch("/api/user/theme", {
       method: "PUT",

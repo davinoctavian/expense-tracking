@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Link from "next/link";
 import { getIcon } from "@/lib/icons";
+import SummaryCard from "@/components/SummaryCard";
 
 type Category = {
   id: string;
@@ -151,53 +152,45 @@ export default function DataPage() {
                 {[
                   {
                     label: "Total Balance",
-                    value: fmt(summary.balance),
+                    value: summary.balance,
                     color: summary.balance >= 0 ? "#10b981" : "#ef4444",
                   },
                   {
                     label: "Total Transactions",
                     value: summary.totalTransactions,
                     color: "var(--text)",
+                    isCurrency: false,
                   },
                   {
                     label: "All-time Income",
-                    value: fmt(summary.totalIncome),
+                    value: summary.totalIncome,
                     color: "#10b981",
                   },
                   {
                     label: "All-time Expenses",
-                    value: fmt(summary.totalExpense),
+                    value: summary.totalExpense,
                     color: "#ef4444",
                   },
                   {
                     label: "Categories",
                     value: summary.totalCategories,
                     color: "var(--text)",
+                    isCurrency: false,
                   },
                   {
                     label: "Budgets",
                     value: summary.totalBudgets,
                     color: "var(--text)",
+                    isCurrency: false,
                   },
                 ].map((card) => (
-                  <div
+                  <SummaryCard
                     key={card.label}
-                    className="rounded-2xl p-5 shadow-sm"
-                    style={{
-                      backgroundColor: "var(--bg-card)",
-                      border: "1px solid var(--border)",
-                    }}
-                  >
-                    <p className="text-xs mb-1" style={tdMuted}>
-                      {card.label}
-                    </p>
-                    <p
-                      className="text-2xl font-bold"
-                      style={{ color: card.color }}
-                    >
-                      {card.value}
-                    </p>
-                  </div>
+                    label={card.label}
+                    value={Number(card.value)}
+                    color={card.color}
+                    isCurrency={card.isCurrency ?? true}
+                  />
                 ))}
               </div>
             )}
@@ -364,8 +357,7 @@ export default function DataPage() {
                             <span
                               className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"
                               style={{
-                                backgroundColor:
-                                  (cat.color ?? "#6366f1") + "33",
+                                backgroundColor: cat.color ?? "#6366f1",
                               }}
                             >
                               {getIcon(cat.icon ?? null)}

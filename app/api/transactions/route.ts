@@ -8,26 +8,32 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
-  const period = searchParams.get("period"); // WEEKLY, MONTHLY, YEARLY
-  const categoryId = searchParams.get("categoryId");
+  const period = searchParams.get("period");
+  const startDate = searchParams.get("startDate");
+  const endDate = searchParams.get("endDate");
 
   const now = new Date();
-  let startDate: Date | undefined;
+  let start: Date | undefined;
+  let end: Date | undefined;
 
-  if (period === "WEEKLY") {
-    startDate = new Date(now);
-    startDate.setDate(now.getDate() - 7);
+  if (startDate && endDate) {
+    // Custom date range
+    start = new Date(startDate);
+    end = new Date(endDate);
+    end.setHours(23, 59, 59, 999); // include full end day
+  } else if (period === "WEEKLY") {
+    start = new Date(now);
+    start.setDate(now.getDate() - 7);
   } else if (period === "MONTHLY") {
-    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    start = new Date(now.getFullYear(), now.getMonth(), 1);
   } else if (period === "YEARLY") {
-    startDate = new Date(now.getFullYear(), 0, 1);
+    start = new Date(now.getFullYear(), 0, 1);
   }
 
   const transactions = await prisma.transaction.findMany({
     where: {
       userId: session.user.id,
-      ...(startDate ? { date: { gte: startDate } } : {}),
-      ...(categoryId ? { categoryId } : {}),
+      ...(start ? { date: { gte: start, ...(end ? { lte: end } : {}) } } : {}),
     },
     include: { category: true },
     orderBy: { date: "desc" },

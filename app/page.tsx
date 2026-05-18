@@ -12,9 +12,10 @@ import {
 } from "recharts";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Navbar from "@/components/Navbar";
-import PeriodSelector from "@/components/PeriodSelector";
+import PeriodSelector, { DateRange } from "@/components/PeriodSelector";
 import { getIcon } from "@/lib/icons";
 import { useSession } from "next-auth/react";
+import SummaryCard from "@/components/SummaryCard";
 
 type Transaction = {
   id: string;
@@ -34,7 +35,6 @@ const COLORS = [
   "#8b5cf6",
   "#ec4899",
 ];
-type Period = "WEEKLY" | "MONTHLY" | "YEARLY";
 
 const fmt = (amount: number) =>
   new Intl.NumberFormat("id-ID", {
@@ -45,17 +45,30 @@ const fmt = (amount: number) =>
 
 export default function DashboardPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [period, setPeriod] = useState<Period>("MONTHLY");
+  const [dateRange, setDateRange] = useState<DateRange>({
+    type: "preset",
+    period: "MONTHLY",
+  });
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
 
   useEffect(() => {
     fetchTransactions();
-  }, [period]);
+  }, [dateRange]);
 
   const fetchTransactions = async () => {
     setLoading(true);
-    const res = await fetch(`/api/transactions?period=${period}`);
+    let url = "/api/transactions?";
+    if (
+      dateRange.type === "custom" &&
+      dateRange.startDate &&
+      dateRange.endDate
+    ) {
+      url += `startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
+    } else {
+      url += `period=${dateRange.period}`;
+    }
+    const res = await fetch(url);
     if (res.ok) setTransactions(await res.json());
     setLoading(false);
   };
@@ -88,54 +101,17 @@ export default function DashboardPage() {
       <Navbar showUserLinks />
 
       <div className="max-w-5xl mx-auto p-4 md:p-6 space-y-4 md:space-y-6">
-        <PeriodSelector value={period} onChange={setPeriod} />
+        <PeriodSelector value={dateRange} onChange={setDateRange} />
 
         {/* Summary Cards — 2 col on mobile, 3 on desktop */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-          <div
-            className="rounded-2xl p-4 md:p-5 shadow-sm col-span-2 md:col-span-1"
-            style={{
-              backgroundColor: "var(--bg-card)",
-              border: "1px solid var(--border)",
-            }}
-          >
-            <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>
-              Balance
-            </p>
-            <p
-              className={`text-xl md:text-2xl font-bold ${balance >= 0 ? "text-green-500" : "text-red-500"}`}
-            >
-              {fmt(balance)}
-            </p>
-          </div>
-          <div
-            className="rounded-2xl p-4 md:p-5 shadow-sm"
-            style={{
-              backgroundColor: "var(--bg-card)",
-              border: "1px solid var(--border)",
-            }}
-          >
-            <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>
-              Income
-            </p>
-            <p className="text-xl md:text-2xl font-bold text-green-500">
-              {fmt(totalIncome)}
-            </p>
-          </div>
-          <div
-            className="rounded-2xl p-4 md:p-5 shadow-sm"
-            style={{
-              backgroundColor: "var(--bg-card)",
-              border: "1px solid var(--border)",
-            }}
-          >
-            <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>
-              Expenses
-            </p>
-            <p className="text-xl md:text-2xl font-bold text-red-500">
-              {fmt(totalExpense)}
-            </p>
-          </div>
+          <SummaryCard
+            label="Balance"
+            value={balance}
+            color={balance >= 0 ? "#10b981" : "#ef4444"}
+          />
+          <SummaryCard label="Income" value={totalIncome} color="#10b981" />
+          <SummaryCard label="Expenses" value={totalExpense} color="#ef4444" />
         </div>
 
         {/* Chart + Recent — stacked on mobile, side by side on desktop */}
@@ -240,8 +216,7 @@ export default function DashboardPage() {
                       <span
                         className="w-8 h-8 rounded-xl flex items-center justify-center text-sm flex-shrink-0"
                         style={{
-                          backgroundColor:
-                            (t.category?.color ?? "#6366f1") + "22",
+                          backgroundColor: t.category?.color ?? "#6366f1",
                         }}
                       >
                         {getIcon(t.category?.icon ?? null)}

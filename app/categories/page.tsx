@@ -176,7 +176,7 @@ export default function CategoriesPage() {
               >
                 <span
                   className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
-                  style={{ backgroundColor: form.color + "33" }}
+                  style={{ backgroundColor: form.color }}
                 >
                   {getIcon(form.icon)}
                 </span>
@@ -238,7 +238,7 @@ export default function CategoriesPage() {
               >
                 <span
                   className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-                  style={{ backgroundColor: (cat.color ?? "#6366f1") + "33" }}
+                  style={{ backgroundColor: cat.color ?? "#6366f1" }}
                 >
                   {getIcon(cat.icon ?? null)}
                 </span>

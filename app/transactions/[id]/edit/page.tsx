@@ -165,19 +165,19 @@ export default function EditTransactionPage() {
                 type="date"
                 value={form.date}
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="w-full box-border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full appearance-none box-border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 style={inputStyle}
                 required
               />
             </div>
 
-            {/* Category */}
+            {/* Budget */}
             <div>
               <label
                 className="block text-sm font-medium mb-1"
                 style={labelStyle}
               >
-                Category <span style={mutedStyle}>(optional)</span>
+                Budget <span style={mutedStyle}>(optional)</span>
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {[{ id: "", name: "None", icon: null }, ...categories].map(

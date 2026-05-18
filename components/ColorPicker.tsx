@@ -80,19 +80,24 @@ export default function ColorPicker({ value, onChange }: Props) {
             backgroundColor: "var(--bg)",
             color: "var(--text)",
             border: "1px solid var(--border)",
+            width: "90%",
           }}
         />
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-9 h-9 rounded-xl cursor-pointer border-0 p-0.5"
-          style={{
-            backgroundColor: "var(--bg-card)",
-            border: "1px solid var(--border)",
-          }}
-          title="Pick custom color"
-        />
+        <label
+          className="w-9 h-9 rounded-xl cursor-pointer border p-0.5"
+          title="Pick a color"
+        >
+          <div
+            className="w-full h-full rounded-xl"
+            style={{ backgroundColor: value }}
+          />
+          <input
+            type="color"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="sr-only"
+          />
+        </label>
       </div>
     </div>
   );

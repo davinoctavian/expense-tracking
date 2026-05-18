@@ -244,7 +244,7 @@ export default function BudgetsPage() {
                 >
                   Category <span style={mutedStyle}>(optional)</span>
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="flex flex-wrap gap-2">
                   {[
                     { id: "", name: "None", icon: null, color: null },
                     ...categories,
@@ -253,7 +253,7 @@ export default function BudgetsPage() {
                       key={cat.id}
                       type="button"
                       onClick={() => setForm({ ...form, categoryId: cat.id })}
-                      className="py-2 px-3 rounded-xl text-sm transition cursor-pointer flex items-center gap-1.5"
+                      className="inline-flex items-center gap-1.5 py-2 px-3 rounded-xl text-sm transition cursor-pointer"
                       style={{
                         border:
                           form.categoryId === cat.id
@@ -270,7 +270,7 @@ export default function BudgetsPage() {
                       }}
                     >
                       {cat.icon && <span>{getIcon(cat.icon)}</span>}
-                      <span className="truncate">{cat.name}</span>
+                      <span>{cat.name}</span>
                     </button>
                   ))}
                 </div>
@@ -308,7 +308,7 @@ export default function BudgetsPage() {
                       onChange={(e) =>
                         setForm({ ...form, [field]: e.target.value })
                       }
-                      className="w-full box-border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full appearance-none box-border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       style={inputStyle}
                       required
                     />
@@ -368,8 +368,7 @@ export default function BudgetsPage() {
                       <span
                         className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"
                         style={{
-                          backgroundColor:
-                            (budget.category?.color ?? "#6366f1") + "33",
+                          backgroundColor: budget.category?.color ?? "#6366f1",
                         }}
                       >
                         {getIcon(budget.category?.icon ?? null)}

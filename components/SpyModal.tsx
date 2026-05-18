@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getIcon } from "@/lib/icons";
 import LoadingSpinner from "./LoadingSpinner";
+import SummaryCard from "./SummaryCard";
 
 type Category = {
   id: string;
@@ -209,53 +210,45 @@ export default function SpyModal({ userId, userName, onClose }: Props) {
                   {[
                     {
                       label: "Balance",
-                      value: fmt(summary.balance),
+                      value: summary.balance,
                       color: summary.balance >= 0 ? "#10b981" : "#ef4444",
                     },
                     {
                       label: "Total Income",
-                      value: fmt(summary.totalIncome),
+                      value: summary.totalIncome,
                       color: "#10b981",
                     },
                     {
                       label: "Total Expenses",
-                      value: fmt(summary.totalExpense),
+                      value: summary.totalExpense,
                       color: "#ef4444",
                     },
                     {
                       label: "Transactions",
                       value: summary.totalTransactions,
                       color: "var(--text)",
+                      isCurrency: false,
                     },
                     {
                       label: "Categories",
                       value: summary.totalCategories,
                       color: "var(--text)",
+                      isCurrency: false,
                     },
                     {
                       label: "Budgets",
                       value: summary.totalBudgets,
                       color: "var(--text)",
+                      isCurrency: false,
                     },
                   ].map((card) => (
-                    <div
+                    <SummaryCard
                       key={card.label}
-                      className="rounded-2xl p-4"
-                      style={{
-                        backgroundColor: "var(--bg)",
-                        border: "1px solid var(--border)",
-                      }}
-                    >
-                      <p className="text-xs mb-1" style={tdMuted}>
-                        {card.label}
-                      </p>
-                      <p
-                        className="text-xl font-bold"
-                        style={{ color: card.color }}
-                      >
-                        {card.value}
-                      </p>
-                    </div>
+                      label={card.label}
+                      value={Number(card.value)}
+                      color={card.color}
+                      isCurrency={card.isCurrency ?? true}
+                    />
                   ))}
                 </div>
               )}
@@ -418,8 +411,7 @@ export default function SpyModal({ userId, userName, onClose }: Props) {
                               <span
                                 className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"
                                 style={{
-                                  backgroundColor:
-                                    (cat.color ?? "#6366f1") + "33",
+                                  backgroundColor: cat.color ?? "#6366f1",
                                 }}
                               >
                                 {getIcon(cat.icon ?? null)}

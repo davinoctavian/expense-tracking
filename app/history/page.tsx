@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import PeriodSelector from "@/components/PeriodSelector";
+import PeriodSelector, { DateRange } from "@/components/PeriodSelector";
 import EmptyState from "@/components/EmptyState";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { getIcon } from "@/lib/icons";
@@ -18,8 +18,6 @@ type Transaction = {
   category: { name: string; icon: string | null; color: string | null } | null;
 };
 
-type Period = "WEEKLY" | "MONTHLY" | "YEARLY";
-
 const fmt = (amount: number) =>
   new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -30,18 +28,31 @@ const fmt = (amount: number) =>
 export default function HistoryPage() {
   const router = useRouter();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [period, setPeriod] = useState<Period>("MONTHLY");
+  const [dateRange, setDateRange] = useState<DateRange>({
+    type: "preset",
+    period: "MONTHLY",
+  });
   const [filter, setFilter] = useState<"ALL" | "INCOME" | "EXPENSE">("ALL");
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTransactions();
-  }, [period]);
+  }, [dateRange]);
 
   const fetchTransactions = async () => {
     setLoading(true);
-    const res = await fetch(`/api/transactions?period=${period}`);
+    let url = "/api/transactions?";
+    if (
+      dateRange.type === "custom" &&
+      dateRange.startDate &&
+      dateRange.endDate
+    ) {
+      url += `startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
+    } else {
+      url += `period=${dateRange.period}`;
+    }
+    const res = await fetch(url);
     if (res.ok) setTransactions(await res.json());
     setLoading(false);
   };
@@ -86,7 +97,7 @@ export default function HistoryPage() {
       />
 
       <div className="max-w-2xl mx-auto p-4 md:p-6 space-y-4">
-        <PeriodSelector value={period} onChange={setPeriod} />
+        <PeriodSelector value={dateRange} onChange={setDateRange} />
 
         {/* Filter */}
         <div className="flex gap-2">
@@ -174,8 +185,7 @@ export default function HistoryPage() {
                     <span
                       className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
                       style={{
-                        backgroundColor:
-                          (t.category?.color ?? "#6366f1") + "22",
+                        backgroundColor: t.category?.color ?? "#6366f1",
                       }}
                     >
                       {getIcon(t.category?.icon ?? null)}

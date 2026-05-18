@@ -70,7 +70,7 @@ export default function AddTransactionPage() {
         form.categoryId &&
         !categories.find((c) => c.id === form.categoryId)
       ) {
-        setError("Selected category has no budget for this date.");
+        setError("Selected budget has no budget for this date.");
         setLoading(false);
         return;
       }
@@ -181,25 +181,25 @@ export default function AddTransactionPage() {
                 type="date"
                 value={form.date}
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="w-full box-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full appearance-none box-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 style={inputStyle}
                 required
               />
             </div>
 
-            {/* Category — only for EXPENSE */}
+            {/* Budget — only for EXPENSE */}
             {form.type === "EXPENSE" && (
               <div>
                 <label
                   className="block text-sm font-medium mb-1"
                   style={labelStyle}
                 >
-                  Category
+                  Budget
                 </label>
 
                 {loadingCategories ? (
                   <p className="text-sm py-3" style={mutedStyle}>
-                    Loading available categories...
+                    Loading available budgets...
                   </p>
                 ) : noBudgetForDate ? (
                   <div
