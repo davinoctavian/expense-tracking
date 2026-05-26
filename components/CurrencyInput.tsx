@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type Props = {
   value: string;
@@ -19,9 +19,7 @@ export default function CurrencyInput({
   style,
   className,
 }: Props) {
-  const [displayValue, setDisplayValue] = useState(
-    value ? formatDisplay(value) : "",
-  );
+  const [displayValue, setDisplayValue] = useState("");
 
   function formatDisplay(raw: string) {
     const num = raw.replace(/\D/g, "");
@@ -29,9 +27,12 @@ export default function CurrencyInput({
     return new Intl.NumberFormat("id-ID").format(Number(num));
   }
 
+  useEffect(() => {
+    setDisplayValue(value ? formatDisplay(value) : "");
+  }, [value]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/\D/g, ""); // digits only
-    setDisplayValue(formatDisplay(raw));
     onChange(raw); // pass raw number string to parent
   };
 
