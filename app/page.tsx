@@ -16,14 +16,29 @@ import PeriodSelector, { DateRange } from "@/components/PeriodSelector";
 import { getIcon } from "@/lib/icons";
 import { useSession } from "next-auth/react";
 import SummaryCard from "@/components/SummaryCard";
+import ExportButton from "@/components/ExportButton";
 
+type Category = {
+  id: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+};
+type Budget = {
+  id: string;
+  amount: number;
+  period: "WEEKLY" | "MONTHLY" | "YEARLY";
+  startDate: string;
+  endDate: string;
+  category: Category | null;
+};
 type Transaction = {
   id: string;
   amount: number;
   type: "INCOME" | "EXPENSE";
   note: string | null;
   date: string;
-  category: { name: string; icon: string | null; color: string | null } | null;
+  category: Category | null;
 };
 
 const COLORS = [
@@ -51,26 +66,46 @@ export default function DashboardPage() {
   });
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
-    fetchTransactions();
+    fetchAll();
   }, [dateRange]);
 
-  const fetchTransactions = async () => {
+  const fetchAll = async () => {
     setLoading(true);
-    let url = "/api/transactions?";
+    const [tRes, bRes, cRes] = await Promise.all([
+      fetch(buildUrl()),
+      fetch("/api/budgets"),
+      fetch("/api/categories"),
+    ]);
+    if (tRes.ok) setTransactions(await tRes.json());
+    if (bRes.ok) setBudgets(await bRes.json());
+    if (cRes.ok) setCategories(await cRes.json());
+    setLoading(false);
+  };
+
+  const buildUrl = () => {
     if (
       dateRange.type === "custom" &&
       dateRange.startDate &&
       dateRange.endDate
     ) {
-      url += `startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
-    } else {
-      url += `period=${dateRange.period}`;
+      return `/api/transactions?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
     }
-    const res = await fetch(url);
-    if (res.ok) setTransactions(await res.json());
-    setLoading(false);
+    return `/api/transactions?period=${dateRange.period}`;
+  };
+
+  const getDateLabel = () => {
+    if (
+      dateRange.type === "custom" &&
+      dateRange.startDate &&
+      dateRange.endDate
+    ) {
+      return `${new Date(dateRange.startDate).toLocaleDateString("id-ID")} – ${new Date(dateRange.endDate).toLocaleDateString("id-ID")}`;
+    }
+    return dateRange.period ?? "Monthly";
   };
 
   const totalIncome = transactions
@@ -101,7 +136,16 @@ export default function DashboardPage() {
       <Navbar showUserLinks />
 
       <div className="max-w-5xl mx-auto p-4 md:p-6 space-y-4 md:space-y-6">
-        <PeriodSelector value={dateRange} onChange={setDateRange} />
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <PeriodSelector value={dateRange} onChange={setDateRange} />
+          <ExportButton
+            transactions={transactions}
+            budgets={budgets}
+            categories={categories}
+            dateLabel={getDateLabel()}
+            summary={{ totalIncome, totalExpense, balance }}
+          />
+        </div>
 
         {/* Summary Cards — 2 col on mobile, 3 on desktop */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">

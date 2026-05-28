@@ -8,14 +8,29 @@ import PeriodSelector, { DateRange } from "@/components/PeriodSelector";
 import EmptyState from "@/components/EmptyState";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { getIcon } from "@/lib/icons";
+import ExportButton from "@/components/ExportButton";
 
+type Category = {
+  id: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+};
+type Budget = {
+  id: string;
+  amount: number;
+  period: "WEEKLY" | "MONTHLY" | "YEARLY";
+  startDate: string;
+  endDate: string;
+  category: Category | null;
+};
 type Transaction = {
   id: string;
   amount: number;
   type: "INCOME" | "EXPENSE";
   note: string | null;
   date: string;
-  category: { name: string; icon: string | null; color: string | null } | null;
+  category: Category | null;
 };
 
 const fmt = (amount: number) =>
@@ -37,24 +52,36 @@ export default function HistoryPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchTransactions();
+    fetchAll();
   }, [dateRange]);
 
-  const fetchTransactions = async () => {
+  const fetchAll = async () => {
     setLoading(true);
-    let url = "/api/transactions?";
+    const [tRes] = await Promise.all([fetch(buildUrl())]);
+    if (tRes.ok) setTransactions(await tRes.json());
+    setLoading(false);
+  };
+
+  const buildUrl = () => {
     if (
       dateRange.type === "custom" &&
       dateRange.startDate &&
       dateRange.endDate
     ) {
-      url += `startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
-    } else {
-      url += `period=${dateRange.period}`;
+      return `/api/transactions?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
     }
-    const res = await fetch(url);
-    if (res.ok) setTransactions(await res.json());
-    setLoading(false);
+    return `/api/transactions?period=${dateRange.period}`;
+  };
+
+  const getDateLabel = () => {
+    if (
+      dateRange.type === "custom" &&
+      dateRange.startDate &&
+      dateRange.endDate
+    ) {
+      return `${new Date(dateRange.startDate).toLocaleDateString("id-ID")} – ${new Date(dateRange.endDate).toLocaleDateString("id-ID")}`;
+    }
+    return dateRange.period ?? "Monthly";
   };
 
   const handleDelete = async (id: string) => {
@@ -62,7 +89,7 @@ export default function HistoryPage() {
     setDeleteId(id);
     await fetch(`/api/transactions/${id}`, { method: "DELETE" });
     setDeleteId(null);
-    fetchTransactions();
+    fetchAll();
   };
 
   const filtered = transactions.filter((t) =>
@@ -97,7 +124,28 @@ export default function HistoryPage() {
       />
 
       <div className="max-w-2xl mx-auto p-4 md:p-6 space-y-4">
-        <PeriodSelector value={dateRange} onChange={setDateRange} />
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <PeriodSelector value={dateRange} onChange={setDateRange} />
+          <ExportButton
+            transactions={transactions}
+            dateLabel={getDateLabel()}
+            summary={{
+              totalIncome: transactions
+                .filter((t) => t.type === "INCOME")
+                .reduce((s, t) => s + t.amount, 0),
+              totalExpense: transactions
+                .filter((t) => t.type === "EXPENSE")
+                .reduce((s, t) => s + t.amount, 0),
+              balance:
+                transactions
+                  .filter((t) => t.type === "INCOME")
+                  .reduce((s, t) => s + t.amount, 0) -
+                transactions
+                  .filter((t) => t.type === "EXPENSE")
+                  .reduce((s, t) => s + t.amount, 0),
+            }}
+          />
+        </div>
 
         {/* Filter */}
         <div className="flex gap-2">
