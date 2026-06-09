@@ -188,6 +188,7 @@ export default function AddTransactionPage() {
             </div>
 
             {/* Budget — only for EXPENSE */}
+            {/* Only show category after date is chosen */}
             {form.type === "EXPENSE" && (
               <div>
                 <label
@@ -197,7 +198,18 @@ export default function AddTransactionPage() {
                   Budget
                 </label>
 
-                {loadingCategories ? (
+                {!form.date ? (
+                  <div
+                    className="rounded-xl p-4 text-sm text-center"
+                    style={{
+                      backgroundColor: "var(--bg-card)",
+                      border: "1px solid var(--border)",
+                      color: "var(--text-muted)",
+                    }}
+                  >
+                    📅 Please select a date first to see available budgets
+                  </div>
+                ) : loadingCategories ? (
                   <p className="text-sm py-3" style={mutedStyle}>
                     Loading available budgets...
                   </p>
@@ -217,7 +229,6 @@ export default function AddTransactionPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-2">
-                    {/* None — only show if general budget exists */}
                     {hasGeneralBudget && (
                       <button
                         type="button"

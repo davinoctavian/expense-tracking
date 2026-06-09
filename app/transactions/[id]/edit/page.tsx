@@ -8,14 +8,22 @@ import Navbar from "@/components/Navbar";
 import FormCard from "@/components/FormCard";
 import ErrorMessage from "@/components/ErrorMessage";
 import { getIcon } from "@/lib/icons";
+import Link from "next/link";
 import CurrencyInput from "@/components/CurrencyInput";
 
-type Category = { id: string; name: string; icon: string | null };
+type Category = {
+  id: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+};
 
 export default function EditTransactionPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [hasGeneralBudget, setHasGeneralBudget] = useState(false);
+  const [loadingCategories, setLoadingCategories] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
@@ -25,57 +33,78 @@ export default function EditTransactionPage() {
     date: "",
     categoryId: "",
   });
-  const [hasGeneralBudget, setHasGeneralBudget] = useState(false);
-  const [availableCategories, setAvailableCategories] = useState<Category[]>(
-    [],
-  );
 
+  // Load existing transaction
   useEffect(() => {
-    fetch("/api/categories")
-      .then((r) => r.json())
-      .then(setCategories);
-
     fetch(`/api/transactions?period=YEARLY`)
       .then((r) => r.json())
       .then((data) => {
         const t = data.find((t: { id: string }) => t.id === id);
         if (t) {
+          const date = new Date(t.date).toISOString().split("T")[0];
           setForm({
             amount: t.amount.toString(),
             type: t.type,
             note: t.note ?? "",
-            date: new Date(t.date).toISOString().split("T")[0],
+            date,
             categoryId: t.categoryId ?? "",
           });
-          // Fetch available categories for this date
-          if (t.type === "EXPENSE")
-            fetchAvailableCategories(
-              new Date(t.date).toISOString().split("T")[0],
-            );
+          // Fetch available categories for this date if expense
+          if (t.type === "EXPENSE" && date) {
+            fetchAvailableCategories(date);
+          }
         }
       });
   }, [id]);
 
+  // Re-fetch categories when date or type changes
+  useEffect(() => {
+    if (form.type === "EXPENSE" && form.date) {
+      fetchAvailableCategories(form.date);
+    } else {
+      setCategories([]);
+      setHasGeneralBudget(false);
+    }
+  }, [form.date, form.type]);
+
   const fetchAvailableCategories = async (date: string) => {
+    setLoadingCategories(true);
     const res = await fetch(`/api/categories/available?date=${date}`);
     if (res.ok) {
       const data = await res.json();
-      setAvailableCategories(data.categories);
+      setCategories(data.categories);
       setHasGeneralBudget(data.hasGeneralBudget);
     }
+    setLoadingCategories(false);
   };
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    // Validate for expense
+    if (form.type === "EXPENSE") {
+      if (!form.categoryId && !hasGeneralBudget) {
+        setError("No general budget found for this date.");
+        setLoading(false);
+        return;
+      }
+    }
+
     const res = await fetch(`/api/transactions/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        ...form,
+        // Clear categoryId for income
+        categoryId: form.type === "INCOME" ? null : form.categoryId || null,
+      }),
     });
+
     const data = await res.json();
     setLoading(false);
+
     if (!res.ok) {
       setError(data.error);
       return;
@@ -91,12 +120,19 @@ export default function EditTransactionPage() {
   const labelStyle = { color: "var(--text)" };
   const mutedStyle = { color: "var(--text-muted)" };
 
+  const noBudgetForDate =
+    form.type === "EXPENSE" &&
+    form.date &&
+    !loadingCategories &&
+    categories.length === 0 &&
+    !hasGeneralBudget;
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg)" }}>
       <FullscreenOverlay show={loading} />
       <Navbar title="Edit Transaction" backHref="/history" />
 
-      <div className="max-w-lg mx-auto p-6">
+      <div className="max-w-lg mx-auto p-4 md:p-6 pb-8">
         <FormCard>
           <ErrorMessage message={error} />
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -116,8 +152,8 @@ export default function EditTransactionPage() {
                   <button
                     key={type}
                     type="button"
-                    onClick={() => setForm({ ...form, type })}
-                    className="flex-1 py-2.5 text-sm font-medium transition cursor-pointer"
+                    onClick={() => setForm({ ...form, type, categoryId: "" })}
+                    className="flex-1 py-3 text-sm font-medium transition cursor-pointer"
                     style={
                       form.type === type
                         ? {
@@ -131,7 +167,7 @@ export default function EditTransactionPage() {
                           }
                     }
                   >
-                    {type.charAt(0) + type.slice(1).toLowerCase()}
+                    {type === "EXPENSE" ? "💸 Expense" : "💰 Income"}
                   </button>
                 ))}
               </div>
@@ -164,51 +200,107 @@ export default function EditTransactionPage() {
               <input
                 type="date"
                 value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="w-full appearance-none box-border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(e) =>
+                  setForm({ ...form, date: e.target.value, categoryId: "" })
+                }
+                className="w-full box-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 style={inputStyle}
                 required
               />
             </div>
 
-            {/* Budget */}
-            <div>
-              <label
-                className="block text-sm font-medium mb-1"
-                style={labelStyle}
-              >
-                Budget <span style={mutedStyle}>(optional)</span>
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {[{ id: "", name: "None", icon: null }, ...categories].map(
-                  (cat) => (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => setForm({ ...form, categoryId: cat.id })}
-                      className="py-2 px-3 rounded-xl text-sm transition cursor-pointer flex items-center gap-1.5"
-                      style={{
-                        border:
-                          form.categoryId === cat.id
-                            ? "1px solid #3b82f6"
-                            : "1px solid var(--border)",
-                        backgroundColor:
-                          form.categoryId === cat.id
-                            ? "#eff6ff"
-                            : "var(--bg-card)",
-                        color:
-                          form.categoryId === cat.id
-                            ? "#1d4ed8"
-                            : "var(--text)",
-                      }}
-                    >
-                      {cat.icon && <span>{getIcon(cat.icon)}</span>}
-                      <span className="truncate">{cat.name}</span>
-                    </button>
-                  ),
+            {/* Budget — EXPENSE only, date required first */}
+            {form.type === "EXPENSE" && (
+              <div>
+                <label
+                  className="block text-sm font-medium mb-1"
+                  style={labelStyle}
+                >
+                  Budget
+                </label>
+
+                {!form.date ? (
+                  <div
+                    className="rounded-xl p-4 text-sm text-center"
+                    style={{
+                      backgroundColor: "var(--bg-card)",
+                      border: "1px solid var(--border)",
+                      color: "var(--text-muted)",
+                    }}
+                  >
+                    📅 Please select a date first to see available budgets
+                  </div>
+                ) : loadingCategories ? (
+                  <p className="text-sm py-3" style={mutedStyle}>
+                    Loading available budgets...
+                  </p>
+                ) : noBudgetForDate ? (
+                  <div
+                    className="rounded-xl p-4 text-sm text-center"
+                    style={{
+                      backgroundColor: "#fef9c3",
+                      color: "#a16207",
+                      border: "1px solid #fde047",
+                    }}
+                  >
+                    ⚠️ No budget found for this date.{" "}
+                    <Link href="/budgets" className="underline font-medium">
+                      Create a budget first
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    {hasGeneralBudget && (
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, categoryId: "" })}
+                        className="py-3 px-3 rounded-xl text-sm transition cursor-pointer flex items-center gap-2"
+                        style={{
+                          border:
+                            form.categoryId === ""
+                              ? "1px solid #3b82f6"
+                              : "1px solid var(--border)",
+                          backgroundColor:
+                            form.categoryId === ""
+                              ? "#eff6ff"
+                              : "var(--bg-card)",
+                          color:
+                            form.categoryId === "" ? "#1d4ed8" : "var(--text)",
+                        }}
+                      >
+                        <span>📊</span>
+                        <span>General</span>
+                      </button>
+                    )}
+                    {categories.map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setForm({ ...form, categoryId: cat.id })}
+                        className="py-3 px-3 rounded-xl text-sm transition cursor-pointer flex items-center gap-2"
+                        style={{
+                          border:
+                            form.categoryId === cat.id
+                              ? "1px solid #3b82f6"
+                              : "1px solid var(--border)",
+                          backgroundColor:
+                            form.categoryId === cat.id
+                              ? "#eff6ff"
+                              : "var(--bg-card)",
+                          color:
+                            form.categoryId === cat.id
+                              ? "#1d4ed8"
+                              : "var(--text)",
+                        }}
+                      >
+                        <span>{getIcon(cat.icon)}</span>
+                        <span className="truncate">{cat.name}</span>
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
-            </div>
+            )}
 
             {/* Note */}
             <div>
@@ -221,7 +313,7 @@ export default function EditTransactionPage() {
               <textarea
                 value={form.note}
                 onChange={(e) => setForm({ ...form, note: e.target.value })}
-                className="w-full rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="w-full rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 style={inputStyle}
                 placeholder="What was this for?"
                 rows={3}
@@ -232,6 +324,7 @@ export default function EditTransactionPage() {
               loading={loading}
               label="Save Changes"
               loadingLabel="Saving..."
+              disabled={form.type === "EXPENSE" && !!noBudgetForDate}
             />
           </form>
         </FormCard>

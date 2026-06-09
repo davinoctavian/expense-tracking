@@ -11,10 +11,32 @@ export async function GET() {
     const budgets = await prisma.budget.findMany({
       where: { userId: session.user.id },
       include: { category: true },
-      orderBy: { createdAt: "desc" },
+      orderBy: { startDate: "desc" },
     });
 
-    return NextResponse.json(budgets);
+    // Calculate spent for each budget based on its own date range
+    const budgetsWithSpent = await Promise.all(
+      budgets.map(async (budget) => {
+        const spent = await prisma.transaction.aggregate({
+          where: {
+            userId: session.user.id,
+            type: "EXPENSE",
+            date: { gte: budget.startDate, lte: budget.endDate },
+            ...(budget.categoryId
+              ? { categoryId: budget.categoryId }
+              : { categoryId: null }),
+          },
+          _sum: { amount: true },
+        });
+
+        return {
+          ...budget,
+          spent: spent._sum.amount ?? 0,
+        };
+      }),
+    );
+
+    return NextResponse.json(budgetsWithSpent);
   } catch (error) {
     return NextResponse.json(
       { error: "Internal server error" },
