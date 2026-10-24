@@ -393,7 +393,7 @@ export default function BudgetsPage() {
               Active Period Overview
             </p>
             <div className="grid grid-cols-3 gap-3 mb-3">
-              <div>
+              <div className="wrap-anywhere">
                 <p className="text-xs mb-0.5" style={mutedStyle}>
                   Total Budget
                 </p>
@@ -404,7 +404,7 @@ export default function BudgetsPage() {
                   {fmt(totalBudget)}
                 </p>
               </div>
-              <div>
+              <div className="wrap-anywhere">
                 <p className="text-xs mb-0.5" style={mutedStyle}>
                   Total Spent
                 </p>
@@ -412,7 +412,7 @@ export default function BudgetsPage() {
                   {fmt(totalSpent)}
                 </p>
               </div>
-              <div>
+              <div className="wrap-anywhere">
                 <p className="text-xs mb-0.5" style={mutedStyle}>
                   Remaining
                 </p>

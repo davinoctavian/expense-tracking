@@ -46,7 +46,7 @@ export default function PeriodSelector({ value, onChange }: Props) {
   return (
     <div className="space-y-2">
       {/* Period buttons */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2">
         {PERIODS.map((p) => (
           <button
             key={p}

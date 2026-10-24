@@ -46,7 +46,7 @@ export default function LoginPage() {
       style={{ backgroundColor: "var(--bg)" }}
     >
       <div
-        className="p-8 rounded-2xl shadow-md w-full max-w-md"
+        className="mx-2 p-8 rounded-2xl shadow-md w-full max-w-md"
         style={{ backgroundColor: "var(--bg-card)" }}
       >
         <h1

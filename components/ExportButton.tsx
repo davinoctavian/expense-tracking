@@ -58,6 +58,11 @@ export default function ExportButton({
     setOpen(false);
   };
 
+  const handleCSVTransactions = () => {
+    exportTransactionsCSV(transactions, dateLabel);
+    setOpen(false);
+  };
+
   const handlePDF = () => {
     if (!budgets && !categories) {
       exportTransactionsPDF(transactions, dateLabel, summary);
@@ -65,6 +70,11 @@ export default function ExportButton({
       if (!budgets || !categories) return;
       exportAllPDF(transactions, budgets, categories, dateLabel, summary);
     }
+    setOpen(false);
+  };
+
+  const handlePDFTransactions = () => {
+    exportTransactionsPDF(transactions, dateLabel, summary);
     setOpen(false);
   };
 
@@ -92,7 +102,7 @@ export default function ExportButton({
 
           {/* Dropdown */}
           <div
-            className="absolute right-0 mt-2 w-44 rounded-xl shadow-lg z-20 overflow-hidden"
+            className="absolute md:right-0 mt-2 w-44 rounded-xl shadow-lg z-20 overflow-hidden"
             style={{
               backgroundColor: "var(--bg-card)",
               border: "1px solid var(--border)",
@@ -111,7 +121,27 @@ export default function ExportButton({
             >
               <span className="text-lg">📊</span>
               <div>
-                <p className="font-medium">Export CSV</p>
+                <p className="font-medium">Export All</p>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  Excel compatible
+                </p>
+              </div>
+            </button>
+
+            <button
+              onClick={handleCSVTransactions}
+              className="w-full px-4 py-3 text-sm text-left flex items-center gap-2 transition cursor-pointer"
+              style={{ color: "var(--text)" }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = "var(--bg)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "transparent")
+              }
+            >
+              <span className="text-lg">📊</span>
+              <div>
+                <p className="font-medium">Export Transactions</p>
                 <p className="text-xs" style={{ color: "var(--text-muted)" }}>
                   Excel compatible
                 </p>
@@ -133,7 +163,27 @@ export default function ExportButton({
             >
               <span className="text-lg">📄</span>
               <div>
-                <p className="font-medium">Export PDF</p>
+                <p className="font-medium">Export All</p>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  Formatted report
+                </p>
+              </div>
+            </button>
+
+            <button
+              onClick={handlePDFTransactions}
+              className="w-full px-4 py-3 text-sm text-left flex items-center gap-2 transition cursor-pointer"
+              style={{ color: "var(--text)" }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = "var(--bg)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "transparent")
+              }
+            >
+              <span className="text-lg">📄</span>
+              <div>
+                <p className="font-medium">Export Transactions</p>
                 <p className="text-xs" style={{ color: "var(--text-muted)" }}>
                   Formatted report
                 </p>
